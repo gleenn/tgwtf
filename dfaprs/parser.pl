@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 use Ham::APRS::FAP qw(parseaprs);
-my $aprspacket = 'DFISH>APT314,WIDE1-1,WIDE2-1:/235256h3724.62N/12201.17W>000/000/KG6YJN|!"%2\'^|!w4a!';
+#my $aprspacket = 'DFISH>APT314,WIDE1-1,WIDE2-1:/235256h3724.62N/12201.17W>000/000/KG6YJN|!"%2\'^|!w4a!';
+my $aprspacket = $ARGV[0];
 my %packetdata;
 my $retval = parseaprs($aprspacket, \%packetdata);
 if ($retval == 1) {
