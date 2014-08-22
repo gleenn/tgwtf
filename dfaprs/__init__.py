@@ -11,6 +11,8 @@ import urllib2
 from datetime import datetime
 
 def handle(packet):
+	script = os.path.join(os.path.dirname(__file__), 'parser.pl')
+	#print ">>> ", script
 	outs = subprocess.check_output( 
 		[os.path.join(os.path.dirname(__file__), 'parser.pl')] )
 	data = json.loads(outs)

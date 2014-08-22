@@ -8,6 +8,8 @@ develop: env
 install:
 	python setup.py install
 	cp dfaprs/dfaprs-upstartd.conf /etc/init/dfaprs.conf
+	initctl reload-configuration
+	start dfaprs
 
 run: develop
 	env/bin/dfaprs

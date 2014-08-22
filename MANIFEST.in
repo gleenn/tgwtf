@@ -1,2 +1,2 @@
 include *.md
-recursive-include brcmap *.ico *.png *.css *.gif *.js *.html *.ini *.cfg *.eot *.svg *.ttf *.woff *.pl
+recursive-include dfaprs *.ico *.png *.css *.gif *.js *.html *.ini *.cfg *.eot *.svg *.ttf *.woff *.pl
