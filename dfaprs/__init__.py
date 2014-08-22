@@ -41,35 +41,33 @@ def main():
 
 	# configure the serial connections (the parameters differs on the 
 	# device you are connecting to)
-	ser = serial.Serial(
-	    port='/dev/ttyUSB0',
-	    baudrate=19200,
-	    xonxoff=0
-	)
+	while(1):
+		try:
+			ser = serial.Serial(
+			    port='/dev/ttyUSB0',
+			    baudrate=19200,
+			    xonxoff=0
+			)
 
-	if ser.isOpen():
-	    print "Serial port was already open!"
-	    ser.close()
+			if ser.isOpen():
+			    print "Serial port was already open!"
+			    ser.close()
 
-	ser.open()
+			ser.open()
 
-	if ser.isOpen():
-	    print "Serial port is now open!"
+			if ser.isOpen():
+			    print "Serial port is now open!"
 
-
-	try:
-	    while 1 :
-	        out = ''
-	        time.sleep(1)
-	        while ser.inWaiting() > 0:
-	            out += ser.read(1)
-	        if out != '':
-	            print ">>" + out
-
-	except KeyboardInterrupt:
-	    ser.close()
-
-	ser.close()
-	exit()
-
-
+			    while 1 :
+			        out = ''
+			        time.sleep(1)
+			        while ser.inWaiting() > 0:
+			            out += ser.read(1)
+			        if out != '':
+			            handle( out )
+		except KeyboardInterrupt:
+		    ser.close()
+		    exit()
+		except Exception as err:
+			print err
+			time.sleep(10)
