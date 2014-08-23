@@ -16,54 +16,67 @@ CALLSIGNS = {
 
 
 def handle(packet):
+    print packet
     script = os.path.join(os.path.dirname(__file__), 'parser.pl')
     outs = subprocess.check_output( 
         [os.path.join(os.path.dirname(__file__), 'parser.pl'), packet] )
     data = json.loads(outs)
 
-    callsign = data.get('srccallsign')
-    lat = data.get('latitude')
-    lng = data.get('longitude')
-    ts = data.get('timestamp')
-    accuracy = data.get('posresolution')
-
-    if callsign in CALLSIGNS: 
-        type = 'vehicle'
-        name = CALLSIGNS[callsign]
+    if 'error' in data:
+        print data['error']
     else:
-        type = 'beacon'
-        name = callsign
+        print data 
+        callsign = data.get('srccallsign')
+        lat = data.get('latitude')
+        lng = data.get('longitude')
+        ts = data.get('timestamp')
+        accuracy = data.get('posresolution')
 
-    print "APRS: %s is at %f,%f; seen at %s" % (callsign,lat,lng,
-        datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'))
+        if callsign in CALLSIGNS: 
+            type = 'vehicle'
+            name = CALLSIGNS[callsign]
+        else:
+            type = 'beacon'
+            name = callsign
 
-    try:
-        req = urllib2.Request(
-            'http://127.0.0.1:8080/2014/api/objects/%s/' % callsign,
-            data = json.dumps({
-                'lat': lat, 
-                'lng': lng, 
-                'ts': ts, 
-                'type':type,
-                'name':name,
-                'accuracy':accuracy }),
-            headers = {
-                'Content-Type':'application/json; charset=utf-8'
-                }
-        )
-        resp = urllib2.urlopen(req)
-        content = resp.read()
+        if lat is None or lng is None or ts is None:
+            print "Missing lat,lng, or timestamp"
+            return
 
-    except Exception as err:
-        print "Posting update failed: %s" % err
+        print "APRS: %s is at %f,%f; seen at %s" % (callsign,lat,lng,
+            datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'))
+
+        try:
+            req = urllib2.Request(
+                'http://127.0.0.1:8091/2014/api/objects/%s/' % callsign,
+                data = json.dumps({
+                    'lat': lat, 
+                    'lng': lng, 
+                    'ts': ts, 
+                    'type':type,
+                    'name':name,
+                    'accuracy':accuracy }),
+                headers = {
+                    'Content-Type':'application/json; charset=utf-8'
+                    }
+            )
+            resp = urllib2.urlopen(req)
+            content = resp.read()
+
+        except Exception as err:
+            print "Posting update failed: %s" % err
 
 
 def main():
     # test
-    handle('TEST>APT314,WIDE1-1,WIDE2-1:/235256h3724.62N/12201.17W>000/000/KG6YJN|!"%2\'^|!w4a!')
+    time.sleep(3)
+    with open(os.path.join(os.path.dirname(__file__), '../testpackets.txt' ), 'r') as inf:
+        for line in inf.readlines():
+            handle(line)
 
     # configure the serial connections (the parameters differs on the 
     # device you are connecting to)
+    print "Listening to serial port..."
     while(1):
         try:
             ser = serial.Serial(

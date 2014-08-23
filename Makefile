@@ -1,12 +1,11 @@
 .PHONY: all clean very-clean develop run
 
-all: develop cpp clips
+all: develop 
 
 develop: env
 	env/bin/python setup.py develop
 
 install:
-	python setup.py install
 	cp dfaprs/dfaprs-upstartd.conf /etc/init/dfaprs.conf
 	initctl reload-configuration
 	start dfaprs
