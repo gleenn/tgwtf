@@ -58,12 +58,13 @@ def checkroot():
 
 
 def install(flags):
+    name = 'dfaprs'
     platform_id = platform.platform()
 
     if platform_id.find('-centos-7.')>=0:
         checkroot() 
         print "Writing systemd config file"
-        with open( '/usr/lib/systemd/system/%s.service' % name, "w") as outf:
+        with open( '/usr/lib/systemd/system/dfaprs%s.service' % name, "w") as outf:
             outf.write(SYSTEMD_CONF_TPL % flags)
         print "Enabling service"
         subprocess.check_call(['/usr/bin/systemctl', 'reset-failed', name + '.service'])
