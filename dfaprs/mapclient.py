@@ -76,6 +76,7 @@ def process_packet(raw_packet):
     logging.debug("\n")
     try:
         parsed_packet = aprslib.parse( raw_packet )
+        logging.debug(json.dumps(parsed_packet,indent=3,sort_keys=True))
         errstats['parsed:ok'] += 1
     except Exception as err:
         logging.error( 'PARSE ERROR: %s', err)

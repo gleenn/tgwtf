@@ -5,13 +5,13 @@ all: develop
 develop: env
 	env/bin/python setup.py develop
 
-test: develop
+run-file: develop
 	env/bin/dfaprs --source=file://test/sample-raw.txt --verbose
 
-run-network:
+run-network: develop
 	env/bin/dfaprs --source=aprs://noam.aprs2.net --verbose
 
-run-serial:
+run-serial: develop
 	env/bin/dfaprs --source=serial:///dev/ttyUSB0 --verbose
 
 install-serial: 
