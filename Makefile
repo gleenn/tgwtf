@@ -36,4 +36,6 @@ clean:
 	rm -rf build
 	rm -rf env
 
+stage:
+	ssh root@www01.brcmap.org "cd /opt/dfaprs && git pull --ff-only && make install-network"
 
