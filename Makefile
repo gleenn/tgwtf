@@ -14,11 +14,11 @@ run-network: develop
 run-serial: develop
 	env/bin/dfaprs --source=serial:///dev/ttyUSB0 --verbose
 
-install-serial: 
+install-serial: env
 	env/bin/python setup.py install
 	env/bin/dfaprs --install --source=serial:///dev/ttyUSB0 --target=http://localhost:8090
 
-install-network: 
+install-network: env
 	env/bin/python setup.py install
 	env/bin/dfaprs --install --source=aprs://noam.aprs2.net --target=http://localhost:8092
 
