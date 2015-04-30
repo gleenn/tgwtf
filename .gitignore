@@ -1,6 +1,6 @@
 *.pyc
+*.egg-info
 *~
 env/
 build/
-*.egg-info/
-local.conf
+dist/

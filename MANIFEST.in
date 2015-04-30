@@ -1,2 +1,0 @@
-include *.md
-recursive-include dfaprs *.ico *.png *.css *.gif *.js *.html *.ini *.cfg *.eot *.svg *.ttf *.woff *.pl

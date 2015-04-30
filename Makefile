@@ -5,13 +5,28 @@ all: develop
 develop: env
 	env/bin/python setup.py develop
 
-install:
-	cp dfaprs/dfaprs-upstartd.conf /etc/init/dfaprs.conf
-	initctl reload-configuration
-	start dfaprs
+test: develop
+	env/bin/dfaprs --source=file://test/sample-raw.txt --verbose
 
-run: develop
-	env/bin/dfaprs
+run-network:
+	env/bin/dfaprs --source=aprs://noam.aprs2.net --verbose
+
+run-serial:
+	env/bin/dfaprs --source=serial:///dev/ttyUSB0 --verbose
+
+install-serial: 
+	env/bin/python setup.py install
+	env/bin/dfaprs --install --source=serial:///dev/ttyUSB0 --target=http://localhost:8090
+
+install-network: 
+	env/bin/python setup.py install
+	env/bin/dfaprs --install --source=aprs://noam.aprs2.net --target=http://localhost:8092
+
+stat:
+	killall -s 16 dfaprs 
+
+env:
+	virtualenv env
 
 clean:
 	find . -name '*.pyc' -exec rm -f {} +
@@ -19,10 +34,6 @@ clean:
 	find . -name '*~' -exec rm -f {} +
 	rm -rf dfaprs.egg-info
 	rm -rf build
-
-very-clean: clean
 	rm -rf env
 
-env:
-	virtualenv env
 

@@ -1,9 +1,9 @@
 Bridge between TNC and local brcmap server
 ===========================================
 
-Preparing machine
------------------
+Preparing machine 
+----------------- 
 
         sudo apt-get install git
-        cpan App::cpanminus
-        cpanm Ham::APRS::FAP
+        sudo git clone git@bitbucket.org:discofish/dfaprs.git /opt/dfaprs
+        sudo make install-[network|serial]
