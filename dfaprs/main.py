@@ -54,7 +54,7 @@ def main():
     else:
         signal.signal(signal.SIGTERM, exit)
         signal.signal(signal.SIGINT, exit)
-        signal.signal(signal.SIGUSR1, stat)
+        signal.signal(signal.SIGHUP, stat)
 
         target_urls = [base + '/2014/api' for base in args.target];
         init(target_urls)

@@ -23,7 +23,7 @@ install-network: env
 	env/bin/dfaprs --install --source=aprs://noam.aprs2.net --target=http://localhost:8092
 
 stat:
-	killall -s 16 dfaprs 
+	killall -HUP dfaprs 
 
 env:
 	virtualenv env

@@ -54,7 +54,7 @@ def feature_from_packet(parsed_packet):
 
     callsign = parsed_packet['from']
     guid = str(uuid3(APRS_NAMESPACE,callsign.encode('ascii')))
-    return {
+    feat = {
         "type": "Feature",
         "geometry": {
             "type": "Point", 
@@ -64,10 +64,18 @@ def feature_from_packet(parsed_packet):
             "uuid": guid,
             "type": type_for_symbol(parsed_packet.get('symbol'), parsed_packet.get('symbol_table')),
             "callsign": callsign,
-            "aprscomment": parsed_packet.get('comment'),
-            "ts": parsed_packet.get('timestamp',None)
         },    
     }
+    props = [
+        ('posambiguity','accuracy'),
+        ('timestamp','pts'),
+        ('comment','aprscomment'),
+    ]
+    for (aprsprop,featprop) in props:
+        val = parsed_packet.get(aprsprop)
+        if val:
+            feat['properties'][featprop] = val
+    return feat
 
 
 def process_packet(raw_packet):
