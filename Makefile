@@ -5,29 +5,11 @@ all: develop
 develop: env
 	env/bin/python setup.py develop
 
-install: install-serial
-
-run: run-serial
-	
-run-file: develop
-	env/bin/dfaprs --source=file://test/sample-raw.txt --verbose
-
-run-network: develop
-	env/bin/dfaprs --source=aprs://noam.aprs2.net --verbose
-
-run-serial: develop
-	env/bin/dfaprs --source=serial:///dev/ttyUSB0 --verbose
-
-install-serial: env
-	env/bin/python setup.py install
-	env/bin/dfaprs --install --source=serial:///dev/ttyUSB0 --target=http://localhost:8090
-
-install-network: env
-	env/bin/python setup.py install
-	env/bin/dfaprs --install --source=aprs://noam.aprs2.net --target=http://localhost:8092
+install: env
+	sudo python setup.py install
 
 stat:
-	killall -HUP dfaprs 
+	sudo killall -HUP dfaprs 
 
 env:
 	virtualenv env
@@ -41,5 +23,5 @@ clean:
 	rm -rf env
 
 stage:
-	ssh root@www01.brcmap.org "cd /opt/dfaprs && git pull --ff-only && make install-network"
+	ssh root@stage.brcmap.org "cd dfaprs && git pull --ff-only && make install && systemctl reset-failed dfaprs.service && systemctl restart dfaprs.service"
 
