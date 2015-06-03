@@ -5,6 +5,10 @@ all: develop
 develop: env
 	env/bin/python setup.py develop
 
+install: install-serial
+
+run: run-serial
+	
 run-file: develop
 	env/bin/dfaprs --source=file://test/sample-raw.txt --verbose
 

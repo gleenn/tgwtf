@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 import time
+import re
 import urllib2
 
 from collections import Counter
@@ -83,6 +84,7 @@ def process_packet(raw_packet):
     errstats['received'] += 1
     logging.debug("\n")
     try:
+        raw_packet = re.sub(r'[\n\r]', '', raw_packet)
         parsed_packet = aprslib.parse( raw_packet )
         logging.debug(json.dumps(parsed_packet,indent=3,sort_keys=True))
         errstats['parsed:ok'] += 1
