@@ -93,7 +93,7 @@ def process_packet(raw_packet):
 
     feat = feature_from_packet( parsed_packet )
     if feat is None:
-        logging.debug('Ignored')
+        logging.debug('No location data, ignored')
         errstats['ignored'] += 1
         return
     
