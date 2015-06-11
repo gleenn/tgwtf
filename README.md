@@ -32,7 +32,7 @@ managed by upstartd.
 		script
 		    export HOME=/root
 		    chdir $HOME
-		    exec dfaprs --source="serial:///dev/ttyUSB*" --target=http://localhost:8091 2>&1 | logger -t dfaprs &
+		    exec /usr/bin/dfaprs --source="serial:///dev/ttyUSB*" --target=http://localhost:8091 2>&1 | logger -t dfaprs &
 		    echo $$ > /var/run/dfaprs.pid
 		end script
 
@@ -47,9 +47,9 @@ managed by upstartd.
 		        echo Stopping dfaprs
 		end script
 	' > /etc/init/dfaprs.conf
-	initctl reload-configuration
-	start dfaprs
-	tail -f /var/log/syslog
+	sudo initctl reload-configuration
+	sudo service dfaprs start 
+	sudo tail -f /var/log/syslog
 
 Installation (CentOS) 
 ----------------------
@@ -69,7 +69,7 @@ by systemd.
     sudo echo 'Description=APRS to BRC Map bridge
 
 		[Service]
-		ExecStart=dfaprs --source=aprs://noam.aprs2.net --target=http://localhost:8091
+		ExecStart=/usr/bin/dfaprs --source=aprs://noam.aprs2.net --target=http://localhost:8091
 		Restart=always
 		StandardOutput=syslog
 		SyslogIdentifier=dfaprs
@@ -84,6 +84,8 @@ by systemd.
 	systemctl start dfaprs
 	tail -f /var/log/messages
 
-To reset daemon state after errrs:
-
+To update:
+	
+	systemctl daemon-reload
 	systemctl reset-failed dfaprs
+	systemctl restart dfaprs

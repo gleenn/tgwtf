@@ -19,6 +19,9 @@ def stat(sig,frame):
 
     if len(typestats) > 0:
         logging.info(typestats)
+
+    if len(errstats) <=0 and len(typestats) <= 0:
+        logging.info("Nothing have been received yet")
     #logging.info(symstats)
 
 
