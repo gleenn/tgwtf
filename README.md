@@ -32,7 +32,7 @@ managed by upstartd.
 		script
 		    export HOME=/root
 		    chdir $HOME
-		    exec /usr/bin/dfaprs --source="serial:///dev/ttyUSB*" --target=http://localhost:8091 2>&1 | logger -t dfaprs &
+		    exec /usr/local/bin/dfaprs --source="serial:///dev/ttyUSB*" --target=http://localhost:8091 2>&1 | logger -t dfaprs &
 		    echo $$ > /var/run/dfaprs.pid
 		end script
 
