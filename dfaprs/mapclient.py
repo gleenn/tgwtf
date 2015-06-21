@@ -89,7 +89,7 @@ def process_packet(raw_packet):
         logging.debug(json.dumps(parsed_packet,indent=3,sort_keys=True))
         errstats['parsed:ok'] += 1
     except Exception as err:
-        logging.error( 'PARSE ERROR: %s', err)
+        logging.error( 'ERR failed to parse, %s: %s', err, raw_packet)
         errstats['parsed:err'] += 1
         return
 
@@ -100,6 +100,15 @@ def process_packet(raw_packet):
         return
     
     logging.debug(json.dumps(feat,indent=3,sort_keys=True))
+    logging.info('RCV %(type)s %(callsign)s%(comment)s @ [%(lng)f, %(lat)f]%(ts)s' % dict(
+            lat=feat['geometry']['coordinates'][1],
+            lng=feat['geometry']['coordinates'][0],
+            type = feat['properties']['type'],
+            comment = ' (' + feat['properties']['aprscomment'] + ')'\
+                if feat['properties'].get('aprscomment') else '',
+            ts = ' on ' + time.ctime(feat['properties']['pts'])\
+                if feat['properties'].get('pts') else '',
+            callsign = feat['properties']['callsign']))
 
     for base_url in target_urls:
         try:
@@ -108,9 +117,8 @@ def process_packet(raw_packet):
             url = "%s/features/%s/" % (base_url,feat['properties']['uuid'])
             req = urllib2.Request( url, json.dumps(feat), {'Content-Type': 'application/json'})
             response = urllib2.urlopen(req).read()
-            logging.debug('posted %s/%s %s', callsign,kind,url)
+            logging.debug('SND %s', url)
             errstats['posted:ok'] += 1
         except Exception as err:
             errstats['posted:err'] += 1
-            logging.error('FAILED %s/%s %s: %s', feat['properties'].get('callsign'),
-                feat['properties']['type'],url,err)
+            logging.error('ERR failed to post, %s: %s', err, url)

@@ -4,6 +4,7 @@ import glob
 import json
 import logging
 import os
+import re
 import serial
 import signal
 import sys
@@ -12,6 +13,7 @@ import urllib2
 
 from .mapclient import process_packet,errstats,typestats,symstats,init
 
+DEFAULT_SERIAL_BPS = 9600
 
 def stat(sig,frame):
     if len(errstats) > 0:
@@ -44,19 +46,19 @@ def main():
         epilog= 
             'examples:\n'
             '  Post APRS data received from network:\n'
-            '    dfaprs -v -s aprs://noam.aprs2.net -t http://localhost:8091\n'
+            '    dfaprs -s aprs://noam.aprs2.net -t http://localhost:8091\n'
             '\n'
             '  Post APRS data received from serial port:\n'
-            '    dfaprs -v -s "serial:///dev/ttyUSB*" -t http://localhost:8091\n' 
+            '    dfaprs -s "serial:///dev/ttyUSB*,%d" -t http://localhost:8091\n' 
             '\n'
             '  Parse APRS packets from file:\n'
-            '    dfaprs -v -s file://test/sample-raw.txt\n'
+            '    dfaprs -s file://test/sample-raw.txt\n'
             '\n'
             '  Log statistics:\n'
             '    killall -HUP dfaprs\n'
             '\n'
             'environment variables:\n'
-            '  BRCMAP_URL\tSame as --target option'
+            '  BRCMAP_URL\tSame as --target option' % (DEFAULT_SERIAL_BPS)
         )
     argparser.add_argument('-v', '--verbose', help="show debug output", action='store_true')
     argparser.add_argument('-s', '--source', help="get APRS data from given source", metavar='URL')
@@ -109,7 +111,9 @@ def main():
                 backoff = min(backoff*2,300)
                 time.sleep(backoff)
     elif args.source.startswith( 'serial://'):
-        ttypat = args.source[9:]
+        ttysettings = args.source[9:].split(',')
+        ttypat = ttysettings[0]
+        ttybps = int(ttysettings[1]) if len(ttysettings)>1 else DEFAULT_SERIAL_BPS
         backoff = 1
         while True:
             try:
@@ -119,10 +123,10 @@ def main():
                 else:
                     raise Exception("No files match %s" % ttypat)
 
-                logging.info('Reading from %s', tty )
+                logging.info('Reading from %s at %d bps', tty, ttybps )
                 ser = serial.Serial(
                     port=tty,
-                    baudrate=19200,
+                    baudrate=ttybps,
                     xonxoff=0
                 )
                 if ser.isOpen():
