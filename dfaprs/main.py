@@ -46,19 +46,21 @@ def main():
         epilog= 
             'examples:\n'
             '  Post APRS data received from network:\n'
-            '    dfaprs -s aprs://noam.aprs2.net -t http://localhost:8091\n'
+            '    %(dfaprs)s -s aprs://noam.aprs2.net -t http://localhost:8091\n'
             '\n'
             '  Post APRS data received from serial port:\n'
-            '    dfaprs -s "serial:///dev/ttyUSB*,%d" -t http://localhost:8091\n' 
+            '    %(dfaprs)s -s "serial:///dev/ttyUSB*,%(bps)d" -t http://localhost:8091\n' 
             '\n'
             '  Parse APRS packets from file:\n'
-            '    dfaprs -s file://test/sample-raw.txt\n'
+            '    %(dfaprs)s -s file://test/sample-raw.txt\n'
             '\n'
             '  Log statistics:\n'
             '    killall -HUP dfaprs\n'
             '\n'
             'environment variables:\n'
-            '  BRCMAP_URL\tSame as --target option' % (DEFAULT_SERIAL_BPS)
+            '  BRCMAP_URL\tSame as --target option' % dict(
+                dfaprs=sys.argv[0],
+                bps=DEFAULT_SERIAL_BPS)
         )
     argparser.add_argument('-v', '--verbose', help="show debug output", action='store_true')
     argparser.add_argument('-s', '--source', help="get APRS data from given source", metavar='URL')
