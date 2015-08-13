@@ -6,7 +6,7 @@ develop: env
 	env/bin/python setup.py develop
 
 install: env
-	sudo python setup.py install
+	python setup.py install
 
 stat:
 	sudo killall -HUP dfaprs 
