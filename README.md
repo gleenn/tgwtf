@@ -6,8 +6,7 @@ Before installation ensure that you have dfaprs deployment keys on the system.
 Installation (Ubuntu)
 ---------------------
 
-This example shows installation in serial configuration with the daemon
-managed by upstartd.
+Serial configuration with the daemon managed by upstartd:
 
     sudo apt-get install -y git
     sudo apt-get install -y make
@@ -19,7 +18,6 @@ managed by upstartd.
     make 
     sudo make install
     sudo echo 'description "APRS to BRC Map bridge"
-		author      "dmitry@azovtsev.com"
 
 		start on runlevel [2345]
 		stop on runlevel [!2345]
@@ -54,8 +52,7 @@ managed by upstartd.
 Installation (CentOS) 
 ----------------------
 
-This example shows intallation in network configuration with the daemon managed 
-by systemd.
+Network configuration with the daemon managed by systemd:
 
     sudo yum install -y git
     sudo yum install -y make
@@ -98,7 +95,7 @@ Calibrating TT4 TNC
 	- Set frequency to 144.39 
 	- Turn off squelching. Make sure you can hear modem buzzes clearly (it's extremely finicky indoors - e.g. moving the radio a couple of feet from one side of the table to another seems to make a big difference). 
 	- Plug in TT4
-	- Open terminal at 19200 bps, flow control off
+	- Open terminal at 19200 bps, flow control off (sudo screen -fn /dev/ttyUSB0 19200,cs8, Ctrl-A k to exit)
 	- Power cycle TT4, press ESC three times to go to command mode
 	- Run MONITOR command to calibrate audio level. Set RXAMP so that the signal saturates around 80 (e.g. I set it to 10) and turn the volume knob so that static is somewhere in 50s. Output level is very, very sensitive to the volume knob position - turning it just a few degrees makes a huge difference. 80 max/50 avg levels seem to work ok, but we may want to fine tune the numbers.
 	- Press any key to exit monitor, make sure that AMODE is set to TEXT, set ABAUD to 9600 (so that we can switch between TT4 & Kenwood without reconfiguring software), and type QUIT to exit command mode

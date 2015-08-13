@@ -35,7 +35,7 @@ except ImportError:
             return {'confidence': 0.0, 'encoding': 'windows-1252'}
 
 from .exceptions import (UnknownFormat, ParseError)
-from . import base91
+from . import base91, string_type_parse
 
 __all__ = ['parse']
 
@@ -65,6 +65,25 @@ MTYPE_TABLE_CUSTOM = {
     }
 
 
+def _unicode_packet(packet):
+    # attempt utf-8
+    try:
+        return packet.decode('utf-8')
+    except UnicodeDecodeError:
+        pass
+
+    # attempt to detect encoding
+    res = chardet.detect(packet.split(b':', 1)[-1])
+    if res['confidence'] > 0.7:
+        try:
+            return packet.decode(res['encoding'])
+        except UnicodeDecodeError:
+            pass
+
+    # if everything fails
+    return packet.decode('latin-1')
+
+
 def parse(packet):
     """
     Parses an APRS packet and returns a dict with decoded data
@@ -78,16 +97,12 @@ def parse(packet):
       * status message
     """
 
-    # attempt to detect encoding
-    try:
-        packet = packet.decode('utf-8')
-    except UnicodeDecodeError:
-        res = chardet.detect(packet)
+    if not isinstance(packet, string_type_parse):
+        raise TypeError("Expected packet to be str/unicode/bytes, got %s", type(packet))
 
-        if res['confidence'] > 0.7:
-            packet = packet.decode(res['encoding'])
-        else:
-            packet = packet.decode('latin-1')
+    # attempt to detect encoding
+    if isinstance(packet, bytes):
+        packet = _unicode_packet(packet)
 
     packet = packet.rstrip("\r\n")
     logger.debug("Parsing: %s", packet)
@@ -98,7 +113,7 @@ def parse(packet):
     # typical packet format
     #
     #  CALL1>CALL2,CALL3,CALL4:>longtext......
-    # |--------header--------|-----body-------|
+    # |--------header---------|-----body------|
     #
     try:
         (head, body) = packet.split(':', 1)
@@ -614,7 +629,7 @@ def _parse_mice(dstcall, body):
         body = body[8:]
 
         # check for optional 2 or 5 channel telemetry
-        match = re.findall(r"^('[0-9a-f]{10}|`[0-9-af]{4})(.*)$", body)
+        match = re.findall(r"^('[0-9a-f]{10}|`[0-9a-f]{4})(.*)$", body)
         if match:
             hexdata, body = match[0]
 
@@ -864,6 +879,10 @@ def _parse_normal(body):
 
         # position ambiguity
         posambiguity = lat_min.count(' ')
+
+        if posambiguity != lon_min.count(' '):
+            raise ParseError("latitude and longitude ambiguity mismatch")
+
         parsed.update({'posambiguity': posambiguity})
 
         # we center the position inside the ambiguity box

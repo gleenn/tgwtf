@@ -22,10 +22,9 @@ import socket
 import select
 import time
 import logging
-import sys
 
-from . import __version__
-from .parse import parse
+from . import __version__, string_type, is_py3
+from .parsing import parse
 from .exceptions import (
     GenericError,
     ConnectionDrop,
@@ -67,7 +66,12 @@ class IS(object):
         self.filter = ""  # default filter, everything
 
         self._connected = False
-        self.buf = ''
+        self.buf = b''
+
+    def _sendall(self, text):
+        if is_py3:
+            text = text.encode('utf-8')
+        self.sock.sendall(text)
 
     def set_filter(self, filter_text):
         """
@@ -78,7 +82,7 @@ class IS(object):
         self.logger.info("Setting filter to: %s", self.filter)
 
         if self._connected:
-            self.sock.sendall("#filter %s\r\n" % self.filter)
+            self._sendall("#filter %s\r\n" % self.filter)
 
     def set_login(self, callsign, passwd):
         """
@@ -109,10 +113,11 @@ class IS(object):
                 self._connect()
                 self._send_login()
                 break
-            except:
+            except (LoginError, ConnectionError):
                 if not blocking:
                     raise
 
+            self.logger.info("Retrying connection is %d seconds." % retry)
             time.sleep(retry)
 
     def close(self):
@@ -122,7 +127,7 @@ class IS(object):
         """
 
         self._connected = False
-        self.buf = ''
+        self.buf = b''
 
         if self.sock is not None:
             self.sock.close()
@@ -131,13 +136,10 @@ class IS(object):
         """
         Send a line, or multiple lines sperapted by '\\r\\n'
         """
+        if not isinstance(line, string_type):
+            raise TypeError("Expected line to be str, got %s", type(line))
         if not self._connected:
             raise ConnectionError("not connected")
-
-        if isinstance(line, unicode):
-            line = line.encode('utf8')
-        elif not isinstance(line, str):
-            line = str(line)
 
         if line == "":
             return
@@ -147,7 +149,7 @@ class IS(object):
         try:
             self.sock.setblocking(1)
             self.sock.settimeout(5)
-            self.sock.sendall(line)
+            self._sendall(line)
         except socket.error as exp:
             self.close()
             raise ConnectionError(str(exp))
@@ -233,27 +235,23 @@ class IS(object):
 
             self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
 
-            if sys.platform not in ['cygwin', 'win32']:
-                # these things don't exist in socket under Windows
-                # pylint: disable=E1103
-                #self.sock.setsockopt(socket.SOL_TCP, socket.TCP_KEEPIDLE, 15)
-                self.sock.setsockopt(socket.SOL_TCP, socket.TCP_KEEPCNT, 3)
-                self.sock.setsockopt(socket.SOL_TCP, socket.TCP_KEEPINTVL, 5)
-                # pylint: enable=E1103
-
             banner = self.sock.recv(512)
+            if is_py3:
+                banner = banner.decode('latin-1')
 
             if banner[0] == "#":
                 self.logger.debug("Banner: %s", banner.rstrip())
             else:
                 raise ConnectionError("invalid banner from server")
 
-        except ConnectionError:
+        except ConnectionError as e:
+            self.logger.error(str(e))
             self.close()
             raise
         except (socket.error, socket.timeout) as e:
             self.close()
 
+            self.logger.error("Socket error: %s" % str(e))
             if str(e) == "timed out":
                 raise ConnectionError("no banner from server")
             else:
@@ -276,9 +274,12 @@ class IS(object):
         self.logger.info("Sending login information")
 
         try:
-            self.sock.sendall(login_str)
+            self._sendall(login_str)
             self.sock.settimeout(5)
-            test = self.sock.recv(len(login_str) + 100).rstrip()
+            test = self.sock.recv(len(login_str) + 100)
+            if is_py3:
+                test = test.decode('latin-1')
+            test = test.rstrip()
 
             self.logger.debug("Server: %s", test)
 
@@ -296,12 +297,14 @@ class IS(object):
             else:
                 self.logger.info("Login successful")
 
-        except LoginError:
+        except LoginError as e:
+            self.logger.error(str(e))
             self.close()
             raise
         except:
             self.close()
-            raise LoginError("failed to login")
+            self.logger.error("Failed to login")
+            raise LoginError("Failed to login")
 
     def _socket_readlines(self, blocking=False):
         """
@@ -310,10 +313,12 @@ class IS(object):
         try:
             self.sock.setblocking(0)
         except socket.error as e:
+            self.logger.error("socket error when setblocking(0): %s" % str(e))
             raise ConnectionDrop("connection dropped")
 
         while True:
-            short_buf = ''
+            short_buf = b''
+            newline = b'\r\n'
 
             select.select([self.sock], [], [], None if blocking else 0)
 
@@ -322,16 +327,18 @@ class IS(object):
 
                 # sock.recv returns empty if the connection drops
                 if not short_buf:
+                    self.logger.error("socket.recv(): returned empty")
                     raise ConnectionDrop("connection dropped")
             except socket.error as e:
-                if "Resource temporarily unavailable" in e:
+                self.logger.error("socket error on recv(): %s" % str(e))
+                if "Resource temporarily unavailable" in str(e):
                     if not blocking:
                         if len(self.buf) == 0:
                             break
 
             self.buf += short_buf
 
-            while "\r\n" in self.buf:
-                line, self.buf = self.buf.split("\r\n", 1)
+            while newline in self.buf:
+                line, self.buf = self.buf.split(newline, 1)
 
                 yield line

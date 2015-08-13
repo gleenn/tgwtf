@@ -15,17 +15,17 @@ APRS_NAMESPACE = UUID('a3eed8c0-106d-4917-8eb3-8779302bb8b1')
 
 # http://www.aprs.org/symbols/symbolsX.txt
 SYMBOLS = {
-    '/>': 'vehicle', # car
-    '/_': 'weather', 
-    '/-': 'house', 
-    '\>': 'vehicle',
-    '\^': 'aircraft',
-    '/^': 'aircraft',
-    '/g': 'aircraft',
-    '/=': 'train', 
-    '//': 'beacon', # red dot
-    '/&': 'beacon', # HF Gateway
-    '/k': 'beacon', # school
+    '/>': (('vehicle', 'car'),), # car
+    '/_': (('beacon', 'weather'),), 
+    '/-': (('building', 'house'),), 
+    '/k': (('building', 'school'),), 
+    '\>': (('vehicle', 'other'),),
+    '\^': (('aircraft', 'other'),),
+    '/^': (('aircraft', 'other'),),
+    '/g': (('aircraft', 'other'),),
+    '/=': (('train', 'other'),), 
+    '//': (('beacon', 'other'),), # red dot
+    '/&': (('beacon', 'gateway'),), # HF Gateway
 }
 
 target_urls = []
@@ -38,13 +38,13 @@ def init(urls):
     global target_urls
     target_urls = urls
 
-def type_for_symbol(symbol,table):
+def tags_for_symbol(symbol,table):
     if not symbol or not table:
-        return 'beacon'
+        return (('beacon', 'other'),)
     key =  table.strip() + symbol.strip()
     symstats[key] += 1
-    res = SYMBOLS.get(key,'beacon');
-    typestats[res] += 1
+    res = SYMBOLS.get(key,(('beacon', 'other'),));
+    typestats[res[0]] += 1
     return res
 
 
@@ -54,11 +54,12 @@ def create_feature(uuid, parsed_packet):
         "type": "Feature",
         "properties": {
             "uuid": uuid,
-            "type": type_for_symbol(parsed_packet.get('symbol'), parsed_packet.get('symbol_table')),
             "callsign": callsign,
             "slug": callsign.lower(),
         },    
     }
+    for (k,v) in tags_for_symbol(parsed_packet.get('symbol'), parsed_packet.get('symbol_table')):
+       feat['properties'][k] = v
     return update_feature(feat, parsed_packet)
 
 
@@ -66,23 +67,21 @@ def update_feature(feat, parsed_packet):
     lat = parsed_packet.get('latitude')
     lng = parsed_packet.get('longitude')
 
-    if not lat or not lng:
-        return None
+    feat['geometry'] = None if not lat or not lng else {
+        "type": "Point", "coordinates": [lng,lat]}
 
-    feat['geometry'] = {
-        "type": "Point", 
-        "coordinates": [lng,lat], 
-    }
     props = [
         ('posambiguity','accuracy'),
-        ('timestamp','pts'),
+        ('timestamp','lastseen'),
         ('comment','aprscomment'),
     ]
     for (aprsprop,featprop) in props:
         val = parsed_packet.get(aprsprop)
         if val:
-            feat['properties'][featprop] = val
-
+            feat['properties'][featprop] = val if featprop != 'lastseen' else int(val)
+    
+    if not feat['properties'].get('lastseen'):
+        feat['properties']['lastseen'] = int(time.time())        
     return feat        
 
 
@@ -100,21 +99,15 @@ def process_packet(raw_packet):
         errstats['parse:err'] += 1
         return
 
-    if 'latitude' not in parsed_packet or 'longitude' not in parsed_packet:
-        logging.debug('No location data, ignored')
-        errstats['ignore:nolocation'] += 1
-        return
-
-    logging.info('RCV %(type)s %(callsign)s%(comment)s @ [%(lng)f, %(lat)f]%(ts)s' % dict(
+    logging.info('RCV %(tags)s %(callsign)s%(comment)s @ [%(lng)s, %(lat)s]%(ts)s' % dict(
             lat=parsed_packet.get('latitude'),
             lng=parsed_packet.get('longitude'),
-            type = type_for_symbol(parsed_packet.get('symbol'), parsed_packet.get('symbol_table')),
+            tags= ' '.join([':'.join(tag) for tag in tags_for_symbol(parsed_packet.get('symbol'), parsed_packet.get('symbol_table'))]),
             comment = ' (' + parsed_packet.get('comment') + ')'\
                 if 'comment' in parsed_packet else '',
             ts = ' on ' + time.ctime(parsed_packet['timestamp'])\
                 if 'timestamp' in parsed_packet else '',
             callsign = parsed_packet.get('from')))
-
     for base_url in target_urls:
         try:
             callsign = parsed_packet['from']

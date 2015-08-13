@@ -11,7 +11,7 @@ import sys
 import time
 import urllib2
 
-from .mapclient import process_packet,errstats,typestats,symstats,init
+from .handler import process_packet,errstats,typestats,symstats,init
 
 DEFAULT_SERIAL_BPS = 9600
 
@@ -45,7 +45,7 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog= 
             'examples:\n'
-            '  Post APRS data received from network:\n'
+            '  Post APRS data received from internet:\n'
             '    %(dfaprs)s -s aprs://noam.aprs2.net -t http://localhost:8091\n'
             '\n'
             '  Post APRS data received from serial port:\n'
@@ -79,7 +79,7 @@ def main():
     signal.signal(signal.SIGINT, exit)
     signal.signal(signal.SIGHUP, stat)
 
-    target_urls = [base + '/2014/api' for base in args.target];
+    target_urls = [base + '/api/v1' for base in args.target];
     init(target_urls)
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO,
         format='%(message)s')

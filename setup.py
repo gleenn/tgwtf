@@ -2,13 +2,15 @@ import os
 from setuptools import setup, find_packages
 
 requires = [
+    # Vendored them in so that we don't have to 
+    # be online if we have to recompile on the playa
     #'aprslib',
-    'pyserial',
+    #'pyserial',
   ]
 
 setup(name='dfaprs',
-      version='0.1',
-      description='A daemon to feed APRS data into BRC Map server',
+      version='1.0',
+      description='A daemon to feed APRS data into BRCMap server',
       classifiers=[
         "Programming Language :: Python",
         ],
