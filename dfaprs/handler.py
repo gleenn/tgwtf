@@ -15,17 +15,12 @@ APRS_NAMESPACE = UUID('a3eed8c0-106d-4917-8eb3-8779302bb8b1')
 
 # http://www.aprs.org/symbols/symbolsX.txt
 SYMBOLS = {
-    '/>': (('vehicle', 'car'),), # car
-    '/_': (('beacon', 'weather'),), 
-    '/-': (('building', 'house'),), 
-    '/k': (('building', 'school'),), 
-    '\>': (('vehicle', 'other'),),
-    '\^': (('aircraft', 'other'),),
-    '/^': (('aircraft', 'other'),),
-    '/g': (('aircraft', 'other'),),
-    '/=': (('train', 'other'),), 
-    '//': (('beacon', 'other'),), # red dot
-    '/&': (('beacon', 'gateway'),), # HF Gateway
+    '/>': [('mobile', 'vehicle')], 
+    '\>': [('mobile', 'vehicle')],
+    '\^': [('mobile', 'aircraft')],
+    '/^': [('mobile', 'aircraft')],
+    '/g': [('mobile', 'aircraft')],
+    '/=': [('mobile', 'train')], 
 }
 
 target_urls = []
@@ -40,11 +35,10 @@ def init(urls):
 
 def tags_for_symbol(symbol,table):
     if not symbol or not table:
-        return (('beacon', 'other'),)
+        return []
     key =  table.strip() + symbol.strip()
     symstats[key] += 1
-    res = SYMBOLS.get(key,(('beacon', 'other'),));
-    typestats[res[0]] += 1
+    res = SYMBOLS.get(key,[]);
     return res
 
 
@@ -55,6 +49,7 @@ def create_feature(uuid, parsed_packet):
         "properties": {
             "uuid": uuid,
             "callsign": callsign,
+            "source": 'aprs',
             "slug": callsign.lower(),
         },    
     }
@@ -71,7 +66,7 @@ def update_feature(feat, parsed_packet):
         "type": "Point", "coordinates": [lng,lat]}
 
     props = [
-        ('posambiguity','accuracy'),
+        ('posambiguity','locationaccuracy'),
         ('timestamp','lastseen'),
         ('comment','aprscomment'),
     ]
@@ -82,6 +77,8 @@ def update_feature(feat, parsed_packet):
     
     if not feat['properties'].get('lastseen'):
         feat['properties']['lastseen'] = int(time.time())        
+    if feat['properties'].get('source') != 'aprs':
+        feat['properties']['locationsource'] = 'aprs'        
     return feat        
 
 
