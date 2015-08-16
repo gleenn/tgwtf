@@ -22,6 +22,7 @@ import time
 import re
 import math
 import logging
+import calendar
 from datetime import datetime
 
 try:
@@ -382,7 +383,7 @@ def _parse_timestamp(body, packet_type=''):
                     timestamp = "19700101000000"
 
                 timestamp = utc.strptime(timestamp, "%Y%m%d%H%M%S")
-                timestamp = time.mktime(timestamp.timetuple())
+                timestamp = calendar.timegm(timestamp.timetuple())
 
                 parsed.update({'raw_timestamp': rawts})
             except Exception as exp:
