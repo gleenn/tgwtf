@@ -79,7 +79,7 @@ def main():
     signal.signal(signal.SIGINT, exit)
     signal.signal(signal.SIGHUP, stat)
 
-    target_urls = [base + '/api/v1' for base in args.target];
+    target_urls = [base + '/api/v2' for base in args.target];
     init(target_urls)
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO,
         format='%(message)s')
