@@ -25,3 +25,5 @@ clean:
 stage:
 	ssh root@stage.brcmap.org "cd dfaprs && git pull --ff-only && make install && systemctl reset-failed dfaprs.service && systemctl restart dfaprs.service"
 
+release:
+	ssh root@www.brcmap.org "cd dfaprs && git pull --ff-only && make install && systemctl reset-failed dfaprs.service && systemctl restart dfaprs.service"
