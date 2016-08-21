@@ -105,7 +105,15 @@ def process_packet(raw_packet):
             ts = ' on ' + time.ctime(parsed_packet['timestamp'])\
                 if 'timestamp' in parsed_packet else '',
             callsign = parsed_packet.get('from')))
+
     for base_url in target_urls:
+        if base_url.startswith('/'):
+            if callsign != 'DFGUPY':
+                continue
+            with open(base_url, 'w') as f:
+                f.write('longitude: %s', parsed_packet['longitude'])
+                f.write('latitude: %s', parsed_packet['latitude'])
+            continue
         try:
             callsign = parsed_packet['from']
             uuid = str(uuid3(APRS_NAMESPACE,callsign.encode('ascii')))
