@@ -109,6 +109,7 @@ def process_packet(raw_packet):
     logging.debug("\n")
     try:
         raw_packet = re.sub(r'[\n\r]', '', raw_packet)
+        logging.info("RAW %s", raw_packet)
         parsed_packet = aprslib.parse( raw_packet )
         logging.debug(json.dumps(parsed_packet,indent=3,sort_keys=True))
         errstats['parse:ok'] += 1
