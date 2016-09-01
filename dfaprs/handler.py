@@ -130,21 +130,25 @@ def process_packet(raw_packet):
             callsign=callsign))
 
     for base_url in target_urls:
-        if base_url.startswith('/'):
-            if callsign != 'DFGUPY':
-                continue
-            logging.info('Writing GUPPY location to file')
-            with open(base_url, 'w') as f:
-                f.write('longitude: %s\n' % parsed_packet['longitude'])
-                f.write('latitude: %s\n' % parsed_packet['latitude'])
-            continue
+        # if base_url.startswith('/'):
+        #     if callsign != 'DFGUPY':
+        #         continue
+        #     logging.info('Writing GUPPY location to file')
+        #     with open(base_url, 'w') as f:
+        #         f.write('longitude: %s\n' % parsed_packet['longitude'])
+        #         f.write('latitude: %s\n' % parsed_packet['latitude'])
+        #     continue
 
         try:
             uuid = str(uuid3(APRS_NAMESPACE,callsign.encode('ascii')))
-            url = "%s/features/%s/" % (base_url,uuid)
+            if callsign == 'DISCOF':
+                url = "%s/features/discofish/" % (base_url)
+            else:
+                url = "%s/features/%s/" % (base_url,callsign.lower())
             req = urllib2.Request(url)
             feat = json.loads(urllib2.urlopen(req).read())
             update_feature(feat, parsed_packet)
+    
             logging.info('UPD %s:%s', callsign, uuid)
         except Exception as err:
             errstats['get:err'] += 1
