@@ -13,7 +13,7 @@ Serial configuration with the daemon managed by upstartd:
 	sudo apt-get install -y python-setuptools
 	sudo easy_install pip
 	sudo pip install virtualenv
-    git clone --depth=1 git@bitbucket.org:discofish/dfaprs.git dfaprs
+    git clone --depth=1 git@gitlab.com:discofish/dfaprs.git dfaprs
     cd dfaprs
     make 
     sudo make install
@@ -59,7 +59,7 @@ Network configuration with the daemon managed by systemd:
 	sudo yum install -y python-setuptools
 	sudo easy_install pip
 	sudo pip install virtualenv
-    git clone --depth=1 git@bitbucket.org:discofish/dfaprs.git dfaprs
+    git clone --depth=1 git@gitlab.com:discofish/dfaprs.git dfaprs
     cd dfaprs
     make 
     sudo make install
