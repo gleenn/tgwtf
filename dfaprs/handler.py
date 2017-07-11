@@ -7,6 +7,7 @@ import time
 import re
 import urllib2
 
+from urlparse import urlparse
 from collections import Counter
 from uuid import UUID,uuid4,uuid3
 from pprint import pprint
@@ -53,6 +54,7 @@ typestats = Counter()
 def init(urls):
     global target_urls
     target_urls = urls
+
 
 def tags_for_symbol(symbol,table):
     if not symbol or not table:
@@ -103,6 +105,54 @@ def update_feature(feat, parsed_packet):
     return feat        
 
 
+def update_file(path, parsed_packet):
+    # construct feature
+    callsign = parsed_packet['from']
+    geometry = {"type": "Point", "coordinates": [parsed_packet["longitude"], parsed_packet["latitude"]]}\
+        if 'longitude' in parsed_packet and 'latitude' in parsed_packet else None
+
+    feat = {
+        "type": "Feature",
+        "geometry": geometry,
+        "properties": {
+            "aprs": callsign,
+            "name": callsign,
+            "rawpacket": parsed_packet.get('raw'),
+            "symbol": parsed_packet.get('symbol'),
+            "comment": parsed_packet.get('comment'),
+            "path": parsed_packet.get('path'),
+        },    
+    }
+    props = [
+        ('posambiguity','locationerror'),
+        ('timestamp','lastseen'),
+        ('comment','comment'),
+    ]
+    for (aprsprop,featprop) in props:
+        val = parsed_packet.get(aprsprop)
+        if val:
+            feat['properties'][featprop] = val if featprop != 'lastseen' else int(val)
+    
+    if not feat['properties'].get('lastseen'):
+        feat['properties']['lastseen'] = int(time.time())        
+
+    # load collection from file
+    try:
+        with open(path, 'r') as inf:
+            collection = json.load(inf)
+        logging.debug('Loaded %s', path)
+    except Exception as err:
+        logging.debug('%s: %s', path, err)
+        collection = {"type": "FeatureCollection", "features": []}
+
+    collection['features'] = filter(lambda f: f['properties'].get('aprs') != callsign, collection['features'])
+    collection['features'].append(feat)
+    logging.debug('Saving %s', path)
+    with open(path, 'w') as outf:
+        json.dump(collection, outf, indent=3)
+    return len(collection['features'])
+
+
 def process_packet(raw_packet):
     global target_urls,errstats
     errstats['receive'] += 1
@@ -118,7 +168,7 @@ def process_packet(raw_packet):
         errstats['parse:err'] += 1
         return
 
-    callsign = parsed_packet.get('from')
+    callsign = parsed_packet['from']
     logging.info('RCV %(tags)s %(callsign)s%(comment)s @ [%(lng)s, %(lat)s]%(ts)s' % dict(
             lat=parsed_packet.get('latitude'),
             lng=parsed_packet.get('longitude'),
@@ -130,7 +180,11 @@ def process_packet(raw_packet):
             callsign=callsign))
 
     for base_url in target_urls:
-        # if base_url.startswith('/'):
+        if base_url.startswith('file://'):
+            sz = update_file(urlparse(base_url).path, parsed_packet)
+            logging.info('SAV %s, %d stations tracked', callsign, sz)
+            continue
+        # elif base_url.startswith('/'):
         #     if callsign != 'DFGUPY':
         #         continue
         #     logging.info('Writing GUPPY location to file')
@@ -150,7 +204,8 @@ def process_packet(raw_packet):
             update_feature(feat, parsed_packet)
     
             logging.info('UPD %s:%s', callsign, uuid)
-        except Exception as err:
+        #except Exception as err:
+        except EnvironmentError as err:
             errstats['get:err'] += 1
             if isinstance(err, urllib2.HTTPError) and err.getcode() == 404:
                 feat = create_feature(uuid, parsed_packet)

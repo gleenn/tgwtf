@@ -48,6 +48,9 @@ def main():
             '  Post APRS data received from internet:\n'
             '    %(dfaprs)s -s aprs://noam.aprs2.net -t http://localhost:8091\n'
             '\n'
+            '  Save APRS data received from internet:\n'
+            '    %(dfaprs)s -s aprs://noam.aprs2.net -t file:///tmp/aprsdata.json\n'
+            '\n'
             '  Post APRS data received from serial port:\n'
             '    %(dfaprs)s -s "serial:///dev/ttyUSB*,%(bps)d" -t http://localhost:8091\n' 
             '\n'
@@ -81,7 +84,7 @@ def main():
 
     target_urls = []
     for base_url in args.target:
-        if not base_url.startswith('/'):
+        if not base_url.startswith('/') and not base_url.startswith('file://'):
             target_urls.append(base_url + '/api/v2')
         else:
             target_urls.append(base_url)
