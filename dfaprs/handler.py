@@ -99,7 +99,7 @@ def update_feature(feat, parsed_packet):
             feat['properties'][featprop] = val if featprop != 'lastseen' else int(val)
     
     if not feat['properties'].get('lastseen'):
-        feat['properties']['lastseen'] = int(time.time())        
+       feat['properties']['lastseen'] = int(time.time())        
     if feat['properties'].get('source') != 'aprs':
         feat['properties']['locationsource'] = 'aprs'        
     return feat        
@@ -148,8 +148,9 @@ def update_file(path, parsed_packet):
     collection['features'] = filter(lambda f: f['properties'].get('aprs') != callsign, collection['features'])
     collection['features'].append(feat)
     logging.debug('Saving %s', path)
-    with open(path, 'w') as outf:
+    with open(path + '.tmp', 'w') as outf:
         json.dump(collection, outf, indent=3)
+    os.rename(path + '.tmp', path)
     return len(collection['features'])
 
 
