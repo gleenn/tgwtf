@@ -1,0 +1,22 @@
+localhost:8080 {
+	log / stderr "WWW: {common}"
+	root ./www/
+	gzip
+}
+
+localhost:8080/assets/ {
+	root ../brcmapjs/build
+	log / stderr "AST: {common}"
+	gzip
+}
+
+localhost:8080/mapdata {
+	root ./var/run/
+	index mapdata.json
+	log / stderr "MAP: {common}"
+	header / {
+		Access-Control-Allow-Origin  *
+		Access-Control-Allow-Methods "GET, POST, OPTIONS"
+	}
+	gzip
+}

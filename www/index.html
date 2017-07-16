@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>WTF (Where Is The Fish?) Kiosk</title>
+	<style>
+	#map {
+		position: absolute; 
+		top: 0px; 
+		left: 0px; 
+		right: 300px; 
+		bottom: 0px;
+		box-sizing: border-box;
+	}
+
+	#info {
+		position: absolute; 
+		width: 300px; 
+		height: 300px; 
+		top: 0px; 
+		right: 0px; 
+		color: #00ff00;
+		background: #000; 
+		border-left: solid #cccccc 1px;
+		border-bottom: solid #cccccc 1px;
+		padding: 15px;
+		font-size: 14px;
+	    overflow: scroll;
+		box-sizing: border-box;
+	}
+
+	#log {
+		position: absolute; 
+		width: 300px; 
+		bottom: 0px; 
+		top: 300px; 
+		right: 0px; 
+		color: #00ff00;
+		background: #000; 
+		border-left: solid #cccccc 1px;
+		padding: 15px;
+		font-size: 10px;
+		font-family: monospace;
+	    white-space: pre;
+	    overflow: scroll;
+		box-sizing: border-box;
+	}
+
+	#logcontent {
+		position: absolute;
+		bottom: 0px;
+	}
+	</style>
+</head>
+<body>
+<div id="map"></div>
+<div id="info">
+	Disco Fish: <span class="status" data-feature-id="aprs/discof"></span><br>
+	BRC Ghost: <span class="status" data-feature-id="brcghost"></span><br>
+</div>
+<div id="log"><div id="logcontent"></div></div>
+<script src="assets/brcmap.debug.js"></script>
+<script>
+	var dataUrl = '/mapdata/';
+	var dataUrl = 'http://localhost:8082';
+	var map = new brcmap.Map(document.getElementById('map'), {
+		dataUrl: dataUrl, 
+		dataPollInterval: 1,
+		rasterTiles: null, 
+		backgroundColor: '#000',
+		outlineColor: '#bc560f',
+	});
+	
+	var views = [
+		{track:'brc2017', zoom:13},
+		{track:'brcghost', zoom:16},
+		{track:'brcghost', zoom:14},
+		{track:'aprs/K6BPS'.toLowerCase(), zoom:16},
+	];
+	var currViewIdx = 0;
+	var timeoutId = null;
+	var updateLog = [];
+	var info = {};
+
+	var updateView = function(feature) {
+		var view = views[currViewIdx];
+		if (feature.id == view.track) {
+			map.setView(feature.coords, view.zoom);
+		}
+		var lastseen = feature.lastseen || new Date();
+		var coords = feature.coords ? feature.coords.map(function(c) {return c.toFixed(5)}).join(',') : '-';
+		updateLog.push(lastseen.toISOString().slice(11,19) + ' ' + feature.id + ' ' + coords);
+		if (updateLog.length > 255) {
+			updateLog.shift();
+		}
+		document.getElementById('logcontent').textContent = updateLog.join('\n');
+	
+		// info[feature.name] = feature.status;
+		// var infolines = [];
+		// for(var k in info) {
+		// 	infolines.push(k + ': ' + info[k]);
+		// }
+		// document.getElementById('info').textContent = infolines.join('\n');
+
+	}
+
+	var nextView = function() {
+		for(i=0; i<views.length; i++) {
+			currViewIdx = (currViewIdx + 1) % views.length;
+			var view = views[currViewIdx % views.length];
+			var f = map.data.features.filter(function(f) {return f.id == view.track})[0];
+			if (f) {
+				map.setView(f.coords, view.zoom);
+				console.log("View #" + (1+currViewIdx) + ": tracking  " + f.id);
+				break;
+			} else {
+				console.error("View #" + (1+currViewIdx) + ": no data for " + view.track);				
+			}
+		}
+		clearTimeout(timeoutId);
+		timeoutId = setTimeout(nextView, 10000);
+	}
+
+
+	var handleKeyEvent = function(e) {
+		if (e.key == 'g') {
+			map.showGrid = !map.showGrid;
+		}		
+		if (e.key == ' ') {
+			nextView();
+		}		
+	};
+
+	document.onkeydown = handleKeyEvent;
+	map.data.onFeatureUpdated = updateView;
+
+	//nextView();
+
+</script>
+</body>
+</html>
