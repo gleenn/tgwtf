@@ -98,8 +98,9 @@ def update_feature(feat, parsed_packet):
         if val:
             feat['properties'][featprop] = val if featprop != 'lastseen' else int(val)
     
-    if not feat['properties'].get('lastseen'):
-       feat['properties']['lastseen'] = int(time.time())        
+    now = int(time.time())
+    if not feat['properties'].get('lastseen') or feat['properties'].get('lastseen', 0) > now:
+       feat['properties']['lastseen'] = now        
     if feat['properties'].get('source') != 'aprs':
         feat['properties']['locationsource'] = 'aprs'        
     return feat        
@@ -116,7 +117,6 @@ def update_file(path, parsed_packet):
         "geometry": geometry,
         "properties": {
             "aprs": callsign,
-            "name": callsign,
             "rawpacket": parsed_packet.get('raw'),
             "symbol": parsed_packet.get('symbol'),
             "comment": parsed_packet.get('comment'),
