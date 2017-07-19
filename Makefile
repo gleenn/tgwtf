@@ -7,6 +7,7 @@ all:
 	$(MAKE) -C $(WSDIR)/brcmapjs all
 
 start: 
+	mkdir -p var/run
 	$(WSDIR)/dfaprs/env/bin/dfaprs -s aprs://noam.aprs2.net -t file://$(PRJDIR)/var/run/mapdata.json & echo $$! > $(PRJDIR)/var/pid/dfaprs.pid
 	caddy & echo $$! > $(PRJDIR)/var/pid/caddy.pid
 
@@ -23,3 +24,7 @@ clean: stop
 
 install: all
 	echo Installing...
+	mkdir -p /opt/dfwtf/www
+	cp www/* /opt/dfwtf/
+	cp nginx.conf /etc/nginx/sites-enabled/dfwtf.conf
+	service nginx restart
