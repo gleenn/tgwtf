@@ -25,6 +25,9 @@ clean: stop
 install: all
 	-service brcmap disable
 	mkdir -p /opt/dfwtf/www
-	cp www/* /opt/dfwtf/
+	mkdir -p /var/run/dfaprs/
+	cp -r www/* /opt/dfwtf/www/
+	chmod -R a+xr /opt/dfwtf
+	chmod -R a+xr /var/run/dfaprs/
 	cp nginx.conf /etc/nginx/sites-enabled/dfwtf.conf
 	service nginx restart
