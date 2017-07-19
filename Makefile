@@ -5,7 +5,6 @@ WSDIR := $(PRJDIR)/..
 all:
 	$(MAKE) -C $(WSDIR)/dfaprs all
 	$(MAKE) -C $(WSDIR)/brcmapjs all
-	cp $(WSDIR)/brcmapjs/build/* .
 
 start: 
 	$(WSDIR)/dfaprs/env/bin/dfaprs -s aprs://noam.aprs2.net -t file://$(PRJDIR)/var/run/mapdata.json & echo $$! > $(PRJDIR)/var/pid/dfaprs.pid
