@@ -67,7 +67,7 @@
 		showPoiStatus: false,
 	})
 	.addGeojsonDataUrl('/mapdata/', 1)
-	.addGeojsonDataUrl('http://localhost:8082', 1)
+	//.addGeojsonDataUrl('http://localhost:8082', 1)
 	.addGeojsonData({"type": "FeatureCollection", "features": [
 			{
               "type": "Feature",
@@ -77,7 +77,7 @@
                     "vehicle": "artcar",
                     "name": "Disco Fish",
                     "description": "DiscoFish is an art car that takes inspiration from the angler fish. Converted from a 21 person, double-decker bus, DiscoFish offers a complete pro-audio sound system, front stage, 30″ illuminated disco ball, and fold down padded fins for guest seating. Come inside the fish to grab a drink at the installed full bar, or climb up to the second level, hang with the DJ, chill and take it all in. This awesome machine is covered with 3000 LEDs that are individually lit and computer controlled to have patterns or messages ripple over the fish. ",
-                    "tracker": "aprs/brcghost"
+                    "tracker": "aprs/discof"
               }
             },
 			{
@@ -99,7 +99,7 @@
                     "vehicle": "artcar",
                     "name": "Keggy",
                     "description": "",
-                    "tracker": "aprs/dfguppy"
+                    "tracker": "aprs/dfkeggy"
               }
             },
         ]});
@@ -122,7 +122,7 @@
 		}
 
 		var vehicleInfo = map.data.features
-			.filter(function(f) {return f.kind == 'vehicle' || (showAllStations && f.kind == 'aprs');})
+			.filter(function(f) {return (f.kind == 'vehicle' || (showAllStations && f.kind == 'aprs')) && f.lastseen;})
 			.map(function(f) {return (f.id == track ? '* ' : '  ') + f.name  + ': ' + f.status(map.data.city, {verbose:true});})
 			.join('\n');
 		document.getElementById('info').textContent = vehicleInfo;			
