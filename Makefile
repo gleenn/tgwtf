@@ -23,7 +23,7 @@ clean: stop
 	mkdir -p var/pid
 
 install: all
-	echo Installing...
+	-service brcmap disable
 	mkdir -p /opt/dfwtf/www
 	cp www/* /opt/dfwtf/
 	cp nginx.conf /etc/nginx/sites-enabled/dfwtf.conf
