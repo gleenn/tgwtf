@@ -55,7 +55,11 @@
 <div id="log"></div>
 <script src="assets/brcmap.debug.js"></script>
 <script>
+    var lowZoom = 14.6;
+    var highZoom = 16;
+
 	var map = new brcmap.Map(document.getElementById('map'), {
+		zoomLevel: lowZoom,
 		rasterTiles: 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png',
 		backgroundColor: '#000',
 		outlineColor: '#bc560f',
@@ -111,10 +115,10 @@
 		if (track) {
 			var feat = map.data.features.find(function(f) {return f.id == track;});
 			if (feat) {
-				map.setView(feat.coords, 16);
+				map.setView(feat.coords, highZoom);
 			}
 		} else {
-			map.setView([-119.2066, 40.7866], 13);
+			map.setView([-119.2066, 40.7866], lowZoom);
 		}
 
 		var vehicleInfo = map.data.features
