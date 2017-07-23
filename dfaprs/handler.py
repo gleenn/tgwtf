@@ -212,7 +212,7 @@ def process_packet(raw_packet):
                 feat = create_feature(uuid, parsed_packet)
                 logging.info('NEW %s:%s', callsign, uuid)
             else:
-                logging.error('ERR failed to get, %s: %s', err, url)
+                logging.error('ERR failed to process %s: %s', base_url, err)
                 continue
 
         logging.debug(json.dumps(feat,indent=3,sort_keys=True))

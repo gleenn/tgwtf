@@ -45,11 +45,14 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog= 
             'examples:\n'
+            '  Save APRS data received from internet:\n'
+            '    %(dfaprs)s -s aprs://noam.aprs2.net -t file:///var/opt/dfaprs/beacons.json\n'
+            '\n'
+            '  Save APRS data received from serial port:\n'
+            '    %(dfaprs)s -s "serial:///dev/ttyUSB*,%(bps)d" -t file:///var/opt/dfaprs/beacons.json\n' 
+            '\n'
             '  Post APRS data received from internet:\n'
             '    %(dfaprs)s -s aprs://noam.aprs2.net -t http://localhost:8091\n'
-            '\n'
-            '  Save APRS data received from internet:\n'
-            '    %(dfaprs)s -s aprs://noam.aprs2.net -t file:///tmp/aprsdata.json\n'
             '\n'
             '  Post APRS data received from serial port:\n'
             '    %(dfaprs)s -s "serial:///dev/ttyUSB*,%(bps)d" -t http://localhost:8091\n' 
