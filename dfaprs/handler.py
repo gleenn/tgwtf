@@ -11,6 +11,7 @@ from urlparse import urlparse
 from collections import Counter
 from uuid import UUID,uuid4,uuid3
 from pprint import pprint
+from datetime import datetime
 
 APRS_NAMESPACE = UUID('a3eed8c0-106d-4917-8eb3-8779302bb8b1')
 
@@ -105,6 +106,9 @@ def update_feature(feat, parsed_packet):
         feat['properties']['locationsource'] = 'aprs'        
     return feat        
 
+def update_log(path, raw_packet):
+    with open(path, 'a') as outf:
+        outf.write(datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ') + ' ' + raw_packet + '\n')
 
 def update_file(path, parsed_packet):
     # construct feature
@@ -181,6 +185,10 @@ def process_packet(raw_packet):
             callsign=callsign))
 
     for base_url in target_urls:
+        if base_url.startswith('log+file://'):
+            sz = update_log(urlparse(base_url).path, raw_packet)
+            logging.info('LOG %s', raw_packet)
+            continue
         if base_url.startswith('file://'):
             sz = update_file(urlparse(base_url).path, parsed_packet)
             logging.info('SAV %s, %d stations tracked', callsign, sz)

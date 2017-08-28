@@ -46,7 +46,7 @@ def main():
         epilog= 
             'examples:\n'
             '  Save APRS data received from internet:\n'
-            '    %(dfaprs)s -s aprs://noam.aprs2.net -t file:///var/opt/dfaprs/beacons.json\n'
+            '    %(dfaprs)s -s aprs://rotate.aprs2.net -t log+file:///var/opt/dfaprs/beacons.log -t file:///var/opt/dfaprs/beacons.json\n'
             '\n'
             '  Save APRS data received from serial port:\n'
             '    %(dfaprs)s -s "serial:///dev/ttyUSB*,%(bps)d" -t file:///var/opt/dfaprs/beacons.json\n' 
@@ -87,7 +87,7 @@ def main():
 
     target_urls = []
     for base_url in args.target:
-        if not base_url.startswith('/') and not base_url.startswith('file://'):
+        if not base_url.startswith('/') and not base_url.startswith('file://') and not base_url.startswith('log+file://'):
             target_urls.append(base_url + '/api/v2')
         else:
             target_urls.append(base_url)
