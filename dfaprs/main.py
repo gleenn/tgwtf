@@ -110,7 +110,8 @@ def main():
     elif args.source.startswith('aprs://'):
         host = args.source[7:]
         AIS = aprslib.IS("N0CALL", host=host, port=14580)
-        AIS.set_filter('r/37.371111/-122.0375/100 r/40.79608429483125/-119.19589964220306/100')
+        #AIS.set_filter('r/37.371111/-122.0375/100 r/40.79608429483125/-119.19589964220306/100')
+        AIS.set_filter('r/40.79608429483125/-119.19589964220306/200')
         backoff = 1
         while True:
             try:
