@@ -46,7 +46,7 @@ def main():
         epilog= 
             'examples:\n'
             '  Save APRS data received from internet:\n'
-            '    %(dfaprs)s -s aprs://rotate.aprs2.net -t log+file:///var/opt/dfaprs/beacons.log -t file:///var/opt/dfaprs/beacons.json\n'
+            '    %(dfaprs)s -s aprs://rotate.aprs2.net -t log+file:///var/opt/dfaprs/beacons.log file:///var/opt/dfaprs/beacons.json\n'
             '\n'
             '  Save APRS data received from serial port:\n'
             '    %(dfaprs)s -s "serial:///dev/ttyUSB*,%(bps)d" -t file:///var/opt/dfaprs/beacons.json\n' 
