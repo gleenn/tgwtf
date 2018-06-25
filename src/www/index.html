@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Your LivePlaya Server Works!</title>
+	<style>
+	#map {
+		position: relative;
+		width: 600pt;
+		height: 400pt;
+		border: solid black 1px;
+	}
+	</style>
+</head>
+<body>
+<h1>Your LivePlaya server works!</h1>
+<!-- p>API endpoints:</p>
+<ul>
+	<li><a href="/api/v0/features/">/api/v0/features/</a> - all map features in GeoJSON format</li>
+</ul -->
+<p>You can now look at the <a href="/api/v0/features/">raw map data</a> in GeoJSON format or render it 
+using our <a href="">JavaScript library</a>:</p> 
+<div id="map"></div>
+<script src="liveplaya.min.js"></script>
+<script>
+	var map = new liveplaya.Map(document.getElementById('map'))
+		.addGeojsonDataUrl(document.location + 'api/v0/features/', 1);
+</script>
+</body>
+</html>
