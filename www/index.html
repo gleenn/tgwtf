@@ -2,85 +2,115 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>WTF (Where Is The Fish?) Kiosk</title>
-	<style>
-	body {
-		overflow: hidden;
-	}
-	#map {
-		position: absolute; 
-		top: 0px; 
-		left: 0px; 
-		right: 0px; 
-		bottom: 0px;
-		box-sizing: border-box;
-	}
+    <title>WTF (Where Is The Fun?)</title>
+    <style>
+    body {
+        overflow: hidden;
+        background: #000;
+    }
+    #map {
+        position: absolute; 
+        top: 0px; 
+        left: 30%; 
+        right: 0px; 
+        bottom: 0px;
+        box-sizing: border-box;
+    }
 
-	#info {
-		position: absolute; 
-		top: 15px; 
-		left: 15px; 
-		color: rgba(0,255,0,0.9);
-		background: rgba(0,0,0,0.5); 
-		padding: 5px;
-		font-size: 18px;
-		font-family: monospace;
-	    overflow: hidden;
-	    white-space: pre;
-	}
+    #list {
+        color: #00ff00;
+        font-family: monospace;
+        font-size: 14pt;
+        position: absolute; 
+        background: #000;
+        left: 0pt;
+        top: 0pt; 
+        width: 30%;
+        bottom: 0pt;
+        padding: 5pt;
+        border-right: solid #ccc 1px;
+        overflow: hidden;
+    }
 
-	#log {
-		position: absolute; 
-		width: 500px; 
-		bottom: 15px; 
-		right: 15px; 
-		color: rgba(0,255,0,0.9);
-		background: rgba(0,0,0,0.5);
-		padding: 5px;
-		font-size: 10px;
-		font-family: monospace;
-	    white-space: pre;
-	    overflow: hidden;
-	}
+    #list span.name {
+        display: block;
+        font-weight: bold
+    }
 
-	#logcontent {
-		position: absolute;
-		bottom: 15px;
-	}
-	</style>
+    #list span.status {
+        display: block;
+        font-size: 80%
+    }
+
+    #info {
+        display: hidden;
+        position: absolute; 
+        top: 15px; 
+        left: 15px; 
+        color: rgba(0,255,0,0.9);
+        background: rgba(0,0,0,0.5); 
+        padding: 5px;
+        font-size: 18px;
+        font-family: monospace;
+        overflow: hidden;
+        white-space: pre;
+    }
+
+    #log {
+        position: absolute; 
+        width: 500px; 
+        bottom: 15px; 
+        right: 15px; 
+        color: rgba(0,255,0,0.9);
+        background: rgba(0,0,0,0.5);
+        padding: 5px;
+        font-size: 10px;
+        font-family: monospace;
+        white-space: pre;
+        overflow: hidden;
+    }
+
+    #logcontent {
+        position: absolute;
+        bottom: 15px;
+    }
+    </style>
 </head>
 <body>
 <div id="map"></div>
+<div id="list"></div>
 <div id="info"></div>
 <div id="log"></div>
-<script src="assets/brcmap.debug.js"></script>
+<script src="liveplaya.debug.js"></script>
 <script>
     var lowZoom = 14.6;
     var highZoom = 16;
 
-	var map = new brcmap.Map(document.getElementById('map'), {
-		zoomLevel: lowZoom,
-		rasterTiles: 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png',
-		backgroundColor: '#000',
-		outlineColor: '#bc560f',
-		highlightColor: '#00ff00',
-		showPoiStatus: false,
-	})
-	.addGeojsonDataUrl('/mapdata/', 1)
-	//.addGeojsonDataUrl('http://localhost:8082', 1)
-	.addGeojsonData({"type": "FeatureCollection", "features": [
-			{
+    var map = new liveplaya.Map(document.getElementById('map'), {
+        wantsFocus: true,
+        zoomLevel: lowZoom,
+        rasterTiles: 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png',
+        backgroundColor: '#000',
+        outlineColor: '#bc560f',
+        highlightColor: '#00ff00',
+        mutedColor: '#00cc00',
+        featureColor: function() {return '#00cc00';},
+        showPoiStatus: false,
+    })
+    .addGeojsonDataUrl( document.location.origin + '/api/v0/features/', 1)
+    .addGeojsonData({"type": "FeatureCollection", "features": [
+            {
               "type": "Feature",
               "geometry": null,
-              "id": "discofish",
+              "id": "tgecko",
               "properties": {
                     "vehicle": "artcar",
-                    "name": "Disco Fish",
-                    "description": "DiscoFish is an art car that takes inspiration from the angler fish. Converted from a 21 person, double-decker bus, DiscoFish offers a complete pro-audio sound system, front stage, 30″ illuminated disco ball, and fold down padded fins for guest seating. Come inside the fish to grab a drink at the installed full bar, or climb up to the second level, hang with the DJ, chill and take it all in. This awesome machine is covered with 3000 LEDs that are individually lit and computer controlled to have patterns or messages ripple over the fish. ",
-                    "tracker": "aprs/discof"
+                    "name": "TechnoGecko",
+                    "description": "",
+                    "tracker": "aprs/tgecko"
               }
             },
-			{
+            {
               "type": "Feature",
               "geometry": null,
               "id": "guppy",
@@ -88,10 +118,10 @@
                     "vehicle": "artcar",
                     "name": "Guppy",
                     "description": "",
-                    "tracker": "aprs/dfguppy"
+                    "tracker": "aprs/dfgupy"
               }
             },
-			{
+            {
               "type": "Feature",
               "geometry": null,
               "id": "keggy",
@@ -99,77 +129,85 @@
                     "vehicle": "artcar",
                     "name": "Keggy",
                     "description": "",
-                    "tracker": "aprs/dfkeggy"
+                    "tracker": "aprs/dfkegy"
               }
             },
         ]});
-	
-	var track = null;
-	var currViewIdx = 0;
-	var timeoutId = null;
-	var log = [];
-	var showLog = true;
-	var showAllStations = false;
 
-	var update = function() {
-		if (track) {
-			var feat = map.data.features.find(function(f) {return f.id == track;});
-			if (feat) {
-				map.setView(feat.coords, highZoom);
-			}
-		} else {
-			map.setView([-119.2066, 40.7866], lowZoom);
-		}
+    var list = new liveplaya.List(document.getElementById('list'), {
+        data: map.data,
+        filter: (f) => f.vehicleKind == 'artcar' || f.kind == 'person' || (f.kind == 'aprs' && showAllStations),
+    });
 
-		var vehicleInfo = map.data.features
-			.filter(function(f) {return (f.kind == 'vehicle' || (showAllStations && f.kind == 'aprs')) && f.lastseen;})
-			.map(function(f) {return (f.id == track ? '* ' : '  ') + f.name  + ': ' + f.status(map.data.city, {verbose:true});})
-			.join('\n');
-		document.getElementById('info').textContent = vehicleInfo;			
+    var track = null;
+    var currViewIdx = 0;
+    var timeoutId = null;
+    var log = [];
+    var showLog = true;
+    var showAllStations = false;
 
-		var logContent = showLog ? map.data.features
-			.filter(function(f) {return f.kind == 'aprs'})
-			.sort(function(a,b) {return b.lastseen - a.lastseen})
-			.slice(0, 10)
-			.reverse()
-			.map(function(f) {return f.lastseen.toLocaleTimeString() + ' ' + f.rawPacket})
-			.join('\n') : '';	
-		document.getElementById('log').textContent = logContent;			
-	}
+    var update = function() {
+        if (track) {
+            var feat = map.data.features.find(function(f) {return f.id == track;});
+            if (feat) {
+                map.setView(feat.coords, highZoom);
+            }
+        } else {
+            map.setView([-119.2066, 40.7866], lowZoom);
+        }
 
-	var nextView = function() {
-		var toTrack = [null].concat(map.data.features
-				.filter(function(f) {return (f.kind == 'vehicle' || (showAllStations && f.kind == 'aprs')) && f.coords;})
-				.map(function(f) {return f.id}));
+        // var vehicleInfo = map.data.features
+        //  .filter(function(f) {return (f.kind == 'vehicle' || (showAllStations && f.kind == 'aprs')) && f.lastseen;})
+        //  .map(function(f) {return (f.id == track ? '* ' : '  ') + f.name  + ': ' + f.status(map.data.city, {verbose:true});})
+        //  .join('\n');
+        // document.getElementById('info').textContent = vehicleInfo;           
 
-		track = toTrack[currViewIdx++ % toTrack.length];
-		update();
-		clearTimeout(timeoutId);
-		timeoutId = setTimeout(nextView, 20000);
-	}
+        var logContent = showLog ? map.data.features
+            .filter(function(f) {return f.kind == 'aprs'})
+            .sort(function(a,b) {return b.lastseen - a.lastseen})
+            .slice(0, 10)
+            .reverse()
+            .map(function(f) {return f.lastseen.toLocaleTimeString() + ' ' + f.rawPacket})
+            .join('\n') : '';   
+        document.getElementById('log').textContent = logContent;            
+    }
 
-	var handleKeyEvent = function(e) {
-		if (e.key == 'g') {
-			map.showGrid = !map.showGrid;
-		}		
-		if (e.key == 'l') {
-			showLog = !showLog;
-			update();
-		}		
-		if (e.key == 'a') {
-			showAllStations = !showAllStations;
-			update();
-		}		
-		if (e.key == ' ') {
-			nextView();
-		}		
-	};
+    var nextView = function() {
+        var toTrack = [null].concat(map.data.features
+                .filter(function(f) {return (f.kind == 'vehicle' || (showAllStations && f.kind == 'aprs')) && f.coords;})
+                .map(function(f) {return f.id}));
 
-	document.onkeydown = handleKeyEvent;
-	map.data.on('update', update);
+        track = toTrack[currViewIdx++ % toTrack.length];
+        update();
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(nextView, 20000);
+    }
 
-	nextView();
+    var handleKeyEvent = function(e) {
+        if (e.key == 'g') {
+            map.showGrid = !map.showGrid;
+        }       
+        if (e.key == 'l') {
+            showLog = !showLog;
+            update();
+        }       
+        if (e.key == 'a') {
+            showAllStations = !showAllStations;
+            update();
+        }       
+        if (e.key == ' ') {
+            nextView();
+        }       
+    };
 
+    document.onkeydown = handleKeyEvent;
+    map.data.on('update', update);
+
+    nextView();
+
+    //setInterval(function() {
+    //    location.reload(true);
+    //}, 10000);
 </script>
 </body>
 </html>

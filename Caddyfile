@@ -4,13 +4,7 @@ localhost:8080 {
 	gzip
 }
 
-localhost:8080/assets/ {
-	root ../brcmapjs/build
-	log / stderr "AST: {common}"
-	gzip
-}
-
-localhost:8080/mapdata {
+localhost:8080/api/v0/features/ {
 	root ./var/run/
 	index mapdata.json
 	log / stderr "MAP: {common}"
