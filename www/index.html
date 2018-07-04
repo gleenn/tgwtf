@@ -97,7 +97,7 @@
         featureColor: function() {return '#00cc00';},
         showPoiStatus: false,
     })
-    .addGeojsonDataUrl( document.location.origin + '/api/v0/features/', 1)
+    .addGeojsonDataUrl( document.location.origin + '/api/v0.2/features/', 1)
     .addGeojsonData({"type": "FeatureCollection", "features": [
             {
               "type": "Feature",
@@ -144,7 +144,7 @@
     var timeoutId = null;
     var log = [];
     var showLog = true;
-    var showAllStations = false;
+    var showAllStations = true;
 
     var update = function() {
         if (track) {

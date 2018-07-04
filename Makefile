@@ -1,32 +1,51 @@
-.PHONY: all start stop restart clean install
-PRJDIR:=${CURDIR}
+.PHONY: all debug release-armv7 run clean deploy
+SOURCE_DIR:=${CURDIR}
+CARGO:=cargo
+DOCKER:=docker
 
-all:
-	${MAKE} -C ${PRJDIR}/dfaprs all
+all: debug release-armv7
 
-start: all
-	mkdir -p ${PRJDIR}/var/run
-	mkdir -p ${PRJDIR}/var/pid
-	dfaprs/env/bin/dfaprs -s aprs://noam.aprs2.net -t file://${PRJDIR}/var/run/mapdata.json & echo $$! > ${PRJDIR}/var/pid/dfaprs.pid
-	caddy & echo $$! > ${PRJDIR}/var/pid/caddy.pid
+debug: 
+	${CARGO} build
 
-stop:
-	-kill -9 `cat ${PRJDIR}/var/pid/dfaprs.pid`
-	-kill -9 `cat ${PRJDIR}/var/pid/caddy.pid`
+release-armv7:
+	${CARGO} build --target=armv7-unknown-linux-gnueabihf --release
 
-restart: all stop start
+run: 
+	${CARGO} run -- --log=/tmp/aprs-beacons.log --docroot=${SOURCE_DIR}/www
 
-clean: stop
-	${MAKE} -C ${PRJDIR}/dfaprs clean
-	rm -rf ${PRJDIR}/var
-	mkdir -p ${PRJDIR}/var/run
-	mkdir -p ${PRJDIR}/var/pid
+clean: 
+	${CARGO} clean
 
-install: all
-	mkdir -p /opt/tgwtf/www
-	mkdir -p /var/run/dfaprs/
-	cp -r ${PRJDIR}/www/* /opt/tgwtf/www/
-	chmod -R a+xr /opt/tgwtf
-	chmod -R a+xr /var/run/dfaprs/
-	cp ${PRJDIR}/nginx.conf /etc/nginx/sites-enabled/tgwtf.conf
-	service nginx restart
+setup: 
+	@if [ -z ${TGWTF_HOST} ]; then echo "Please set TGWTF_HOST environment variable" && exit -1; fi
+	cat ${HOME}/.ssh/id_rsa.pub | ssh pi@${TGWTF_HOST} 'sudo mount -o remount,rw / && mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys'
+	ssh pi@${TGWTF_HOST} 'sudo mkdir -p /root/.ssh && sudo cp /home/pi/.ssh/authorized_keys /root/.ssh/authorized_keys'
+
+deploy: release-armv7
+	@if [ -z ${TGWTF_HOST} ]; then echo "Please set TGWTF_HOST environment variable" && exit -1; fi
+	@if [ -z ${CARGO_TARGET_DIR} ]; then echo "Please set CARGO_TARGET_DIR environment variable" && exit -1; fi
+	-ssh root@${TGWTF_HOST} "service tgwtf stop"
+	ssh pi@${TGWTF_HOST} "sudo mount -o remount,rw /"
+	ssh root@${TGWTF_HOST} "mkdir -p /opt/tgwtf/bin && mkdir -p /opt/tgwtf/etc && mkdir -p /opt/tgwtf/www"	
+	scp ${SOURCE_DIR}/etc/tgwtf.service.conf root@${TGWTF_HOST}:/etc/systemd/system/tgwtf.service
+	scp ${SOURCE_DIR}/www/index.html root@${TGWTF_HOST}:/opt/tgwtf/www/index.html
+	scp ${SOURCE_DIR}/www/liveplaya.debug.js root@${TGWTF_HOST}:/opt/tgwtf/www/liveplaya.debug.js
+	scp ${CARGO_TARGET_DIR}/armv7-unknown-linux-gnueabihf/release/tgwtf root@${TGWTF_HOST}:/opt/tgwtf/bin/tgwtf
+	ssh -t root@${TGWTF_HOST} "systemctl enable tgwtf && systemctl reset-failed tgwtf && systemctl start tgwtf"
+	ssh root@${TGWTF_HOST} "service tgwtf restart"
+	-ssh root@${TGWTF_HOST} "sudo reboot"
+
+
+docker-build:
+	${DOCKER} build -t tgwtf .
+
+docker-run: docker-build
+	${DOCKER} run -it --rm -p 8080:8080 tgwtf
+
+docker-deploy: docker-build
+	@if [ -z ${TGWTF_HOST} ]; then echo "Please set TGWTF_HOST environment variable" && exit 255; fi
+	${DOCKER} run -it --rm  -e "TGWTF_HOST=${TGWTF_HOST}" tgwtf deploy
+
+docker-shell: 
+	${DOCKER} run -it --rm -v${SOURCE_DIR}:/workdir --entrypoint=/bin/bash tgwtf
