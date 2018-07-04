@@ -35,7 +35,7 @@ RUN chmod 700 /root/.ssh &&\
 
 # Download and compile tgwtf
 RUN mkdir /src && \
-	git clone git@gitlab.com:technogecko/tgwtf.git /src/tgwtf -b dev
+	git clone git@gitlab.com:technogecko/tgwtf.git /src/tgwtf
 WORKDIR /src/tgwtf
 ENV CARGO_TARGET_DIR=/build/tgwtf
 RUN make all
