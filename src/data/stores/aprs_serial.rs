@@ -40,13 +40,13 @@ pub fn read(tty: &str, baudrate: u32) -> Result<impl Iterator<Item = RawPacket>,
     serport.configure(&settings).map_err(|e| Error::Open{tty: tty.to_string(), why: e})?;
     serport.set_timeout(Duration::from_secs(1)).map_err(|e| Error::Open{tty: tty.to_string(), why: e})?;
 
-    info!(">>Opened {}, baud rate {:?} ?? {}", tty, settings.baud_rate.speed(), baudrate);
+    info!("Opened {}, baud rate {}", tty, settings.baud_rate.speed());
 
     let tty = tty.to_string();
     let res = BufReader::new(serport)
         .lines()
-        .inspect(|l| info!("{:?}", l))
         .filter_map(|l| not_timeout(l))
+        // .inspect(|l| info!("{:?}", l))
         .filter_map(move |l| l.ok_or_log())
         .map(move |l| RawPacket{ 
             source: format!("{}", tty),

@@ -6,6 +6,9 @@ use chrono::{DateTime, Utc};
 
 #[derive(Debug, Fail)]
 pub enum Error {
+    #[fail(display = "{} is not an APRS packet", raw_packet)]
+    NotAprsPacket{ raw_packet: RawPacket },
+
     #[fail(display = "{}: {}", raw_packet, err)]
     Parse{ raw_packet: RawPacket, err: AprsParseError },
 }
@@ -30,7 +33,12 @@ impl Display for RawPacket {
 }
 
 pub fn parse(raw_packet: RawPacket) -> Result<Feature, Error> {
-	ParsedPacket::new(raw_packet.data.clone()).map(|parsed_packet| {
+	info!("{}", raw_packet);
+	if raw_packet.data.len() < 1 || raw_packet.data[0] == '#' as u8 || raw_packet.data[0] == '$' as u8 {
+		return Err(Error::NotAprsPacket{raw_packet});
+	}
+
+	let res = ParsedPacket::new(raw_packet.data.clone()).map(|parsed_packet| {
 		Feature::AprsStation{
 			callsign: parsed_packet.source().to_string(), 
 			symbol: parsed_packet.symbol(),
@@ -38,6 +46,7 @@ pub fn parse(raw_packet: RawPacket) -> Result<Feature, Error> {
 			last_pos: parsed_packet.position(),
 			last_packet: Some(raw_packet.to_string()),
 		}
-	}).map_err(|err| Error::Parse{ raw_packet, err })
+	}).map_err(|err| Error::Parse{ raw_packet, err });
+	res
 }
 

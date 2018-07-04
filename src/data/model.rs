@@ -3,6 +3,7 @@ pub use aprs_proto::{Position, Symbol};
 use std::collections::{HashMap, hash_map::Keys, hash_map::Values};
 use chrono::{DateTime, Utc};
 
+
 pub const EARTH_R : f32 =  6378137.0;
 
 pub type Point = (f32, f32);

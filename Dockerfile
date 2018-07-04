@@ -29,11 +29,13 @@ ENV USER="root"
 # Add deployment keys and configure ssh
 ADD etc/tgwtf_deploy_id_rsa /root/.ssh/id_rsa
 ADD etc/tgwtf_deploy_id_rsa.pub /root/.ssh/id_rsa.pub
-RUN chmod 700 /root/.ssh && printf "    IdentityFile ~/.ssh/id_rsa\n    StrictHostKeyChecking no\n" >> /etc/ssh/ssh_config
+RUN chmod 700 /root/.ssh &&\
+	chmod 700 /root/.ssh/id_rsa &&\
+	printf "    IdentityFile ~/.ssh/id_rsa\n    StrictHostKeyChecking no\n" >> /etc/ssh/ssh_config
 
 # Download and compile tgwtf
 RUN mkdir /src && \
-	git clone git@gitlab.com:technogecko/tgwtf.git /src/tgwtf
+	git clone git@gitlab.com:technogecko/tgwtf.git /src/tgwtf -b dev
 WORKDIR /src/tgwtf
 ENV CARGO_TARGET_DIR=/build/tgwtf
 RUN make all

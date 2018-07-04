@@ -22,9 +22,9 @@ impl PlayaData {
 		let data = PlayaData{ data: Arc::new(RwLock::new(Collection::new())) };
 	    
 	    // Load seed data
-		aprs_log::read_mem(SEED_LOG).filter_map(|raw_packet| aprs::parse(raw_packet)
-				.ok_or_log())
-			.for_each(|feature| data.data.write().unwrap().update(feature));
+		// aprs_log::read_mem(SEED_LOG).filter_map(|raw_packet| aprs::parse(raw_packet)
+		// 		.ok_or_log())
+		// 	.for_each(|feature| data.data.write().unwrap().update(feature));
 
 		// Load digest
 	    if let Ok(iter) = aprs_log::read(&digest_path) {
