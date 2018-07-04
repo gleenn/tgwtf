@@ -82,13 +82,13 @@ fn main() {
     let digest_file = args.value_of("digest").unwrap_or("/opt/tgwtf/aprs-digest.log");
     let tty = args.value_of("tty").unwrap_or("/dev/ttyUSB0");
     let baudrate = value_t!(args.value_of("baudrate"), u32).unwrap_or(9600);
-    let aprsis_server = args.value_of("aprsis").unwrap_or("rotate.aprs2.net:14580");
+    let _aprsis_server = args.value_of("aprsis").unwrap_or("rotate.aprs2.net:14580");
     let docroot = args.value_of("docroot");
 
     info!("{} v{}", APPNAME, crate_version!());
 
     let mut data = data::PlayaData::new(log_file.to_string(), digest_file.to_string());
-    data.add_aprs_source(data::stores::aprs_is::keep_reading(aprsis_server));
+    // data.add_aprs_source(data::stores::aprs_is::keep_reading(aprsis_server));
     data.add_aprs_source(data::stores::aprs_serial::keep_reading(tty, baudrate));
 
     webui::run(http_port, data, docroot.map(|s| s.to_string())); 

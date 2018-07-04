@@ -50,6 +50,7 @@ impl PlayaData {
 	    let cloned = self.clone();
 	    thread::spawn(move || {
 	    	iter.filter_map(|raw_packet| aprs::parse(raw_packet).ok_or_log())
+	    		.inspect(|f| info!("{:?}", f))
 	    		.for_each(|feature| cloned.data.write().unwrap().update(feature))
 	    });
 	}
