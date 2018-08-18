@@ -3,8 +3,8 @@ use actix_web::{server, App, HttpRequest, HttpResponse, Responder, middleware::c
 use data::PlayaData;
 use logger::{OkOrLog};
 
-static INDEX_HTML: &'static str = include_str!("www/index.html");
-static MAIN_JS: &'static [u8] = include_bytes!("www/liveplaya.min.js");
+static INDEX_HTML: &'static str = include_str!("../www/index.html");
+static MAIN_JS: &'static [u8] = include_bytes!("../www/liveplaya.min.js");
 
 fn builtin_html(_req: HttpRequest) -> impl Responder {
     HttpResponse::Ok()

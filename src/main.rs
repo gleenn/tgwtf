@@ -78,8 +78,8 @@ fn main() {
       args.occurrences_of("timestamp") > 0);
 
     let http_port = value_t!(args.value_of("httpport"), u16).unwrap_or(8080);
-    let log_file = args.value_of("log").unwrap_or("/opt/tgwtf/aprs-beacons.log");
-    let digest_file = args.value_of("digest").unwrap_or("/opt/tgwtf/aprs-digest.log");
+    let log_file = args.value_of("log"); //.unwrap_or("/opt/tgwtf/aprs-beacons.log");
+    let digest_file = args.value_of("digest"); //.unwrap_or("/opt/tgwtf/aprs-digest.log");
     let tty = args.value_of("tty").unwrap_or("/dev/ttyUSB0");
     let baudrate = value_t!(args.value_of("baudrate"), u32).unwrap_or(9600);
     let _aprsis_server = args.value_of("aprsis").unwrap_or("rotate.aprs2.net:14580");
@@ -87,7 +87,7 @@ fn main() {
 
     info!("{} v{}", APPNAME, crate_version!());
 
-    let mut data = data::PlayaData::new(log_file.to_string(), digest_file.to_string());
+    let mut data = data::PlayaData::new(log_file, digest_file);
     // data.add_aprs_source(data::stores::aprs_is::keep_reading(aprsis_server));
     data.add_aprs_source(data::stores::aprs_serial::keep_reading(tty, baudrate));
 
