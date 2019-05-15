@@ -1,17 +1,21 @@
-# WTF (Where is The Fun?) 
+# WTF (Where is The Fun?)
 
 ## Getting started
 
 The easies way to get started is to use Docker. Install Docker (`sudo apt-get install docker.io` on Ubuntu<sup>1</sup>, or download and run installers for [Mac](https://www.docker.com/docker-mac) or [Windows](https://www.docker.com/docker-windows)), then type:
 
 ```shell
-    # check out and build
+	# check out and build
 	git clone git@gitlab.com:technogecko/tgwtf.git
 	cd tgwtf
 	docker build -t tgwtf .
 
 	# run
 	docker run -it --rm -p 8080:8080 tgwtf
+	open http://<docker machine ip address>:8080
+
+	# get a shell
+	docker run -it --rm  -e "TGWTF_HOST=wtf01" bash
 ```
 
 Then open web browser and navigate to http://localhost:8080 - you should see the map.
