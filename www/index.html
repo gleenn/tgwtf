@@ -9,10 +9,10 @@
         background: #000;
     }
     #map {
-        position: absolute; 
-        top: 0px; 
-        left: 30%; 
-        right: 0px; 
+        position: absolute;
+        top: 0px;
+        left: 30%;
+        right: 0px;
         bottom: 0px;
         box-sizing: border-box;
     }
@@ -21,10 +21,10 @@
         color: #00ff00;
         font-family: monospace;
         font-size: 14pt;
-        position: absolute; 
+        position: absolute;
         background: #000;
         left: 0pt;
-        top: 0pt; 
+        top: 0pt;
         width: 30%;
         bottom: 0pt;
         padding: 5pt;
@@ -44,11 +44,11 @@
 
     #info {
         display: hidden;
-        position: absolute; 
-        top: 15px; 
-        left: 15px; 
+        position: absolute;
+        top: 15px;
+        left: 15px;
         color: rgba(0,255,0,0.9);
-        background: rgba(0,0,0,0.5); 
+        background: rgba(0,0,0,0.5);
         padding: 5px;
         font-size: 18px;
         font-family: monospace;
@@ -57,10 +57,10 @@
     }
 
     #log {
-        position: absolute; 
-        width: 500px; 
-        bottom: 15px; 
-        right: 15px; 
+        position: absolute;
+        width: 500px;
+        bottom: 15px;
+        right: 15px;
         color: rgba(0,255,0,0.9);
         background: rgba(0,0,0,0.5);
         padding: 5px;
@@ -81,7 +81,7 @@
 <div id="list"></div>
 <div id="info"></div>
 <div id="log"></div>
-<script src="liveplaya.debug.js"></script>
+<script src="liveplaya.min.js"></script>
 <script>
     var lowZoom = 14.6;
     var highZoom = 16;
@@ -160,7 +160,7 @@
         //  .filter(function(f) {return (f.kind == 'vehicle' || (showAllStations && f.kind == 'aprs')) && f.lastseen;})
         //  .map(function(f) {return (f.id == track ? '* ' : '  ') + f.name  + ': ' + f.status(map.data.city, {verbose:true});})
         //  .join('\n');
-        // document.getElementById('info').textContent = vehicleInfo;           
+        // document.getElementById('info').textContent = vehicleInfo;
 
         var logContent = showLog ? map.data.features
             .filter(function(f) {return f.kind == 'aprs'})
@@ -168,8 +168,8 @@
             .slice(0, 10)
             .reverse()
             .map(function(f) {return f.lastseen.toLocaleTimeString() + ' ' + f.rawPacket})
-            .join('\n') : '';   
-        document.getElementById('log').textContent = logContent;            
+            .join('\n') : '';
+        document.getElementById('log').textContent = logContent;
     }
 
     var nextView = function() {
@@ -186,18 +186,18 @@
     var handleKeyEvent = function(e) {
         if (e.key == 'g') {
             map.showGrid = !map.showGrid;
-        }       
+        }
         if (e.key == 'l') {
             showLog = !showLog;
             update();
-        }       
+        }
         if (e.key == 'a') {
             showAllStations = !showAllStations;
             update();
-        }       
+        }
         if (e.key == ' ') {
             nextView();
-        }       
+        }
     };
 
     document.onkeydown = handleKeyEvent;
