@@ -21,6 +21,24 @@ setup:
 	@if [ -z ${TGWTF_HOST} ]; then echo "Please set TGWTF_HOST environment variable" && exit -1; fi
 	cat ${HOME}/.ssh/id_rsa.pub | ssh pi@${TGWTF_HOST} 'sudo mount -o remount,rw / && mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys'
 	ssh pi@${TGWTF_HOST} 'sudo mkdir -p /root/.ssh && sudo cp /home/pi/.ssh/authorized_keys /root/.ssh/authorized_keys'
+	ssh pi@${TGWTF_HOST} 'sudo apt-get update && sudo apt-get upgrade -y'
+
+setup-kiosk-mode:
+	ssh pi@${TGWTF_HOST} 'sudo apt-get install chromium-bsu x11-xserver-utils unclutter -y'
+	ssh root@${TGWTF_HOST} 'sudo sed -i -e "s/@xscreensaver -no-splash/#@xscreensaver -no-splash/" /etc/xdg/lxsession/LXDE-pi/autostart'
+	ssh root@${TGWTF_HOST} 'echo "@xset s off\n@xset -dpms\n@xset s noblank" >> /etc/xdg/lxsession/LXDE-pi/autostart'
+	ssh root@${TGWTF_HOST} "sudo sed -i 's/\"exited_cleanly\": false/\"exited_cleanly\": true/' ~root/.config/chromium/Default/Preferences"
+	ssh root@${TGWTF_HOST} "sudo sed -i 's/\"exited_cleanly\": false/\"exited_cleanly\": true/' ~pi/.config/chromium/Default/Preferences"
+
+
+setup-realtime-clock:
+	@if [ -z ${TGWTF_HOST} ]; then echo "Please set TGWTF_HOST environment variable" && exit -1; fi
+	ssh -t root@${TGWTF_HOST} 'sudo apt-get install i2c-tools -y'
+	ssh -t root@${TGWTF_HOST} 'sed -i -e "s/#dtparam=i2c_arm=on/dtparam=i2c_arm=on/" /boot/config.txt'
+	#ssh -t root@${TGWTF_HOST} 'sed -i -e "s/#dtoverlay=i2c-rtc,pcf8523/dtoverlay=i2c-rtc,pcf8523/" /boot/config.txt'
+	ssh -t root@${TGWTF_HOST} 'echo "dtoverlay=i2c-rtc,pcf8523" >> /boot/config.txt'
+	ssh -t root@${TGWTF_HOST} 'sed -i -e "s/if [ -e \/run\/systemd\/system ] ; then\nexit 0\nfi//" /boot/config.txt'
+
 
 deploy: release-armv7
 	@if [ -z ${TGWTF_HOST} ]; then echo "Please set TGWTF_HOST environment variable" && exit -1; fi
