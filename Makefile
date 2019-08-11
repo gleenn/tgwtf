@@ -5,7 +5,7 @@ DOCKER:=docker
 
 all: debug release-armv7
 
-debug: 
+debug:
 	${CARGO} build
 
 release-armv7:
@@ -17,11 +17,18 @@ run:
 clean: 
 	${CARGO} clean
 
-setup: 
+setup-key:
 	@if [ -z ${TGWTF_HOST} ]; then echo "Please set TGWTF_HOST environment variable" && exit -1; fi
 	cat ${HOME}/.ssh/id_rsa.pub | ssh pi@${TGWTF_HOST} 'sudo mount -o remount,rw / && mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys'
 	ssh pi@${TGWTF_HOST} 'sudo mkdir -p /root/.ssh && sudo cp /home/pi/.ssh/authorized_keys /root/.ssh/authorized_keys'
+
+setup: setup-key
+	@if [ -z ${TGWTF_HOST} ]; then echo "Please set TGWTF_HOST environment variable" && exit -1; fi
 	ssh pi@${TGWTF_HOST} 'sudo apt-get update && sudo apt-get upgrade -y'
+
+ssh:
+	@if [ -z ${TGWTF_HOST} ]; then echo "Please set TGWTF_HOST environment variable" && exit -1; fi
+	ssh pi@${TGWTF_HOST}
 
 setup-kiosk-mode:
 	ssh pi@${TGWTF_HOST} 'sudo apt-get install chromium-bsu x11-xserver-utils unclutter -y'
@@ -65,5 +72,5 @@ docker-deploy: docker-build
 	@if [ -z ${TGWTF_HOST} ]; then echo "Please set TGWTF_HOST environment variable" && exit 255; fi
 	${DOCKER} run -it --rm  -e "TGWTF_HOST=${TGWTF_HOST}" tgwtf deploy
 
-docker-shell: 
+docker-shell:
 	${DOCKER} run -it --rm -v${SOURCE_DIR}:/workdir --entrypoint=/bin/bash tgwtf
