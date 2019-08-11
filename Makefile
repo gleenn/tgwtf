@@ -22,9 +22,12 @@ setup-key:
 	cat ${HOME}/.ssh/id_rsa.pub | ssh pi@${TGWTF_HOST} 'sudo mount -o remount,rw / && mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys'
 	ssh pi@${TGWTF_HOST} 'sudo mkdir -p /root/.ssh && sudo cp /home/pi/.ssh/authorized_keys /root/.ssh/authorized_keys'
 
-setup: setup-key
+update-and-upgrade:
 	@if [ -z ${TGWTF_HOST} ]; then echo "Please set TGWTF_HOST environment variable" && exit -1; fi
 	ssh pi@${TGWTF_HOST} 'sudo apt-get update && sudo apt-get upgrade -y'
+
+setup: setup-key update-and-upgrade
+    echo "Done setting up :)"
 
 ssh:
 	@if [ -z ${TGWTF_HOST} ]; then echo "Please set TGWTF_HOST environment variable" && exit -1; fi
