@@ -33,13 +33,19 @@ ssh:
 	@if [ -z ${TGWTF_HOST} ]; then echo "Please set TGWTF_HOST environment variable" && exit -1; fi
 	ssh pi@${TGWTF_HOST}
 
-setup-kiosk-mode:
-	ssh pi@${TGWTF_HOST} 'sudo apt-get install chromium-bsu x11-xserver-utils unclutter -y'
-	ssh root@${TGWTF_HOST} 'sudo sed -i -e "s/@xscreensaver -no-splash/#@xscreensaver -no-splash/" /etc/xdg/lxsession/LXDE-pi/autostart'
-	ssh root@${TGWTF_HOST} 'echo "@xset s off\n@xset -dpms\n@xset s noblank" >> /etc/xdg/lxsession/LXDE-pi/autostart'
-	ssh root@${TGWTF_HOST} "sudo sed -i 's/\"exited_cleanly\": false/\"exited_cleanly\": true/' ~root/.config/chromium/Default/Preferences"
-	ssh root@${TGWTF_HOST} "sudo sed -i 's/\"exited_cleanly\": false/\"exited_cleanly\": true/' ~pi/.config/chromium/Default/Preferences"
+reboot:
+	@if [ -z ${TGWTF_HOST} ]; then echo "Please set TGWTF_HOST environment variable" && exit -1; fi
+	ssh pi@${TGWTF_HOST} 'sudo reboot'
 
+start-kiosk-mode:
+	@if [ -z ${TGWTF_HOST} ]; then echo "Please set TGWTF_HOST environment variable" && exit -1; fi
+	ssh pi@${TGWTF_HOST} 'startx -- -nocursor'
+
+setup-kiosk-mode:
+	ssh pi@${TGWTF_HOST} 'sudo apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit openbox chromium-browser'
+	scp ${SOURCE_DIR}/etc/xdg/openbox/autostart root@${TGWTF_HOST}:/etc/xdg/openbox/autostart
+	ssh pi@${TGWTF_HOST} 'sudo update-alternatives --set x-session-manager /usr/bin/openbox-session'
+	ssh pi@${TGWTF_HOST} 'sudo chmod u+x /etc/xdg/openbox/autostart'
 
 setup-realtime-clock:
 	@if [ -z ${TGWTF_HOST} ]; then echo "Please set TGWTF_HOST environment variable" && exit -1; fi
