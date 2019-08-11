@@ -19,7 +19,9 @@ clean:
 
 setup-key:
 	@if [ -z ${TGWTF_HOST} ]; then echo "Please set TGWTF_HOST environment variable" && exit -1; fi
-	cat ${HOME}/.ssh/id_rsa.pub | ssh pi@${TGWTF_HOST} 'sudo mount -o remount,rw / && mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys'
+	ssh pi@${TGWTF_HOST} 'sudo mount -o remount,rw / '
+	cat ${SOURCE_DIR}/etc/tgwtf_deploy_id_rsa.pub | ssh pi@${TGWTF_HOST} 'mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys'
+	cat ${SOURCE_DIR}/etc/tgwtf_deploy_id_rsa.pub | ssh root@${TGWTF_HOST} 'mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys'
 	ssh pi@${TGWTF_HOST} 'sudo mkdir -p /root/.ssh && sudo cp /home/pi/.ssh/authorized_keys /root/.ssh/authorized_keys'
 
 update-and-upgrade:
@@ -32,6 +34,10 @@ setup: setup-key update-and-upgrade
 ssh:
 	@if [ -z ${TGWTF_HOST} ]; then echo "Please set TGWTF_HOST environment variable" && exit -1; fi
 	ssh pi@${TGWTF_HOST}
+
+debug-service:
+	@if [ -z ${TGWTF_HOST} ]; then echo "Please set TGWTF_HOST environment variable" && exit -1; fi
+	ssh pi@${TGWTF_HOST} 'sudo journalctl -u tgwtf.service'
 
 reboot:
 	@if [ -z ${TGWTF_HOST} ]; then echo "Please set TGWTF_HOST environment variable" && exit -1; fi
@@ -55,13 +61,23 @@ setup-realtime-clock:
 	ssh -t root@${TGWTF_HOST} 'echo "dtoverlay=i2c-rtc,pcf8523" >> /boot/config.txt'
 	ssh -t root@${TGWTF_HOST} 'sed -i -e "s/if [ -e \/run\/systemd\/system ] ; then\nexit 0\nfi//" /boot/config.txt'
 
+setup-service:
+	@if [ -z ${TGWTF_HOST} ]; then echo "Please set TGWTF_HOST environment variable" && exit -1; fi
+	-ssh root@${TGWTF_HOST} "service tgwtf stop"
+	scp ${SOURCE_DIR}/etc/run_tgwtf_service.sh root@${TGWTF_HOST}:/opt/tgwtf/bin/run_tgwtf_service.sh
+	scp ${SOURCE_DIR}/etc/tgwtf.service.conf root@${TGWTF_HOST}:/etc/systemd/system/tgwtf.service
+	ssh root@${TGWTF_HOST} "chmod 750 /opt/tgwtf/bin/run_tgwtf_service.sh"
+	ssh root@${TGWTF_HOST} "chmod 755 /etc/systemd/system/tgwtf.service"
+	ssh -t root@${TGWTF_HOST} "systemctl enable tgwtf && systemctl reset-failed tgwtf && systemctl start tgwtf"
+	ssh pi@${TGWTF_HOST} 'sudo journalctl -u tgwtf.service'
+# 	ssh root@${TGWTF_HOST} "service tgwtf restart"
 
 deploy: release-armv7
 	@if [ -z ${TGWTF_HOST} ]; then echo "Please set TGWTF_HOST environment variable" && exit -1; fi
 	@if [ -z ${CARGO_TARGET_DIR} ]; then echo "Please set CARGO_TARGET_DIR environment variable" && exit -1; fi
 	-ssh root@${TGWTF_HOST} "service tgwtf stop"
 	ssh pi@${TGWTF_HOST} "sudo mount -o remount,rw /"
-	ssh root@${TGWTF_HOST} "mkdir -p /opt/tgwtf/bin && mkdir -p /opt/tgwtf/etc && mkdir -p /opt/tgwtf/www"	
+	ssh root@${TGWTF_HOST} "mkdir -p /opt/tgwtf/bin && mkdir -p /opt/tgwtf/etc && mkdir -p /opt/tgwtf/www"
 	scp ${SOURCE_DIR}/etc/tgwtf.service.conf root@${TGWTF_HOST}:/etc/systemd/system/tgwtf.service
 	scp ${SOURCE_DIR}/www/index.html root@${TGWTF_HOST}:/opt/tgwtf/www/index.html
 	scp ${SOURCE_DIR}/www/liveplaya.debug.js root@${TGWTF_HOST}:/opt/tgwtf/www/liveplaya.debug.js
