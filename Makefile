@@ -29,7 +29,6 @@ update-and-upgrade:
 	ssh pi@${TGWTF_HOST} 'sudo apt-get update && sudo apt-get upgrade -y'
 
 setup: setup-key update-and-upgrade
-    echo "Done setting up :)"
 
 ssh:
 	@if [ -z ${TGWTF_HOST} ]; then echo "Please set TGWTF_HOST environment variable" && exit -1; fi
